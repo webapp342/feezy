@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+Thumbs.db
 
 # debug
 npm-debug.log*
@@ -30,12 +31,19 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — never commit secrets
+.env
+.env.*
+!.env.example
 
-# vercel
+# vercel / local tooling
 .vercel
+.cursor/
+agent-transcripts/
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# temp previews
+public/brand/kit/_*.png

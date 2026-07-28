@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Feezy
 
-## Getting Started
+Creator-fee meme coin site: random XP-weighted snapshots, wallet auth, raids, referrals, Redis leaderboard.
 
-First, run the development server:
+## Stack
+
+- **Frontend:** Next.js (App Router) + Solana Wallet Adapter
+- **API:** Next.js Route Handlers (Vercel serverless)
+- **DB:** Neon PostgreSQL
+- **Cache / leaderboard:** Upstash Redis
+- **Chain:** Solana RPC (balance verified on the server)
+
+## Quick start
+
+1. Copy env file and fill values (see end of this README / `.env.example`):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run `sql/schema.sql` in the Neon SQL Editor.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Install & run:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000).
 
-To learn more about Next.js, take a look at the following resources:
+## API
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Method | Path | Auth | Notes |
+|--------|------|------|--------|
+| POST | `/api/auth` | — | `nonce` / `verify` wallet signature |
+| DELETE | `/api/auth` | — | Clear session |
+| POST | `/api/sync-wallet` | session | Backend RPC → XP → Redis ZADD |
+| GET | `/api/leaderboard` | — | Redis only, cached 15s |
+| GET | `/api/me` | session | Profile + XP breakdown |
+| GET/POST | `/api/tasks` | POST needs session | Generic task list / claim |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Flow
 
-## Deploy on Vercel
+1. User connects wallet and signs a nonce message.
+2. Backend verifies signature, sets httpOnly session, creates user (+ referral_pending if `?ref=`).
+3. `POST /api/sync-wallet` reads token balance from Solana RPC, recalculates XP, updates Postgres + Redis.
+4. UI leaderboard always reads Redis — never Postgres.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Free-tier notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Leaderboard responses use `Cache-Control: s-maxage=15`.
+- Sync is rate-limited per wallet (`SYNC_COOLDOWN_SECONDS`).
+- Do not poll the leaderboard every few seconds.
