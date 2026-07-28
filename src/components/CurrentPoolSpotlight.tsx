@@ -29,8 +29,7 @@ export function CurrentPoolSpotlight({
             <span> SOL</span>
           </p>
           <p className="pool-spotlight-note muted small">
-            Next snapshot split · +{bonusSol} SOL bonus · {snapshotsPerDay}×
-            daily
+            Next snapshot split · {snapshotsPerDay}× daily, random times
           </p>
         </>
       )}

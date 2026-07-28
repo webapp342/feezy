@@ -74,7 +74,6 @@ export function RewardsPanel({ refreshKey = 0 }: { refreshKey?: number }) {
             <p className="error small">{data.current_rewards_error}</p>
           ) : (
             <p className="board-stat-foot muted small">
-              Creator fees + {data.pool_bonus_sol ?? 100} SOL bonus ·{" "}
               {data.rules.snapshots_per_day}× daily, random times
             </p>
           )}

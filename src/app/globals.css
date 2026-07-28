@@ -2285,11 +2285,22 @@ a:hover {
 }
 
 .auth-wallet-empty {
+  display: grid;
+  gap: 0.65rem;
   margin: 0;
   padding: 0.75rem;
   border-radius: 12px;
   border: 1px dashed var(--line);
-  text-align: center;
+}
+
+.auth-wallet-fallback {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.auth-wallet-hint {
+  margin: 0.65rem 0 0;
+  line-height: 1.4;
 }
 
 .auth-steps {
