@@ -93,16 +93,18 @@ export function Hero() {
             className="hero-img hero-gif-main"
             width={640}
             height={640}
+            fetchPriority="high"
+            decoding="async"
           />
           <div className="hero-floaters" aria-hidden>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.laugh} alt="" className="floater floater-a" />
+            <img src={s.laugh} alt="" className="floater floater-a" loading="lazy" decoding="async" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={BRAND.images.coin} alt="" className="floater floater-b" />
+            <img src={BRAND.images.coin} alt="" className="floater floater-b" loading="lazy" decoding="async" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.point} alt="" className="floater floater-c" />
+            <img src={s.point} alt="" className="floater floater-c" loading="lazy" decoding="async" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.logo} alt="" className="floater floater-d" />
+            <img src={s.logo} alt="" className="floater floater-d" loading="lazy" decoding="async" />
           </div>
         </div>
       </div>

@@ -1,7 +1,11 @@
 import { readSession } from "@/lib/auth";
 import { firstRow, getDb } from "@/lib/db";
+import { getEnv } from "@/lib/env";
 import { jsonError, jsonOk } from "@/lib/http";
-import { rawToUiAmount } from "@/lib/solana";
+import { getLeaderboard, getWalletRank } from "@/lib/redis";
+import { estimateSnapshotEarnings } from "@/lib/snapshot-estimate";
+import { SNAPSHOT_RULES, effectiveSnapshotPool } from "@/lib/snapshot-rules";
+import { fetchCreatorUnclaimedFeesSol, rawToUiAmount } from "@/lib/solana";
 import { daysBetween } from "@/lib/xp";
 
 export const runtime = "nodejs";
@@ -72,6 +76,27 @@ export async function GET() {
 
     const balanceRaw = BigInt(String(ws?.old_balance ?? 0));
     const balanceUi = rawToUiAmount(balanceRaw);
+    const board = await getWalletRank(user.wallet_address);
+    const userXp = board?.xp ?? Number(xp?.total_xp ?? 0);
+    const rank = board?.rank ?? null;
+
+    const { CREATOR_WALLET } = getEnv();
+    let onChainSol = 0;
+    try {
+      onChainSol = await fetchCreatorUnclaimedFeesSol(CREATOR_WALLET);
+    } catch {
+      onChainSol = 0;
+    }
+    const poolSol = effectiveSnapshotPool(onChainSol);
+
+    const topEntries = await getLeaderboard(SNAPSHOT_RULES.top_xp_weighted);
+    const estimate = estimateSnapshotEarnings(
+      userXp,
+      rank,
+      topEntries,
+      poolSol,
+      SNAPSHOT_RULES,
+    );
 
     return jsonOk({
       wallet: user.wallet_address,
@@ -81,6 +106,8 @@ export async function GET() {
       last_sync: ws?.last_sync ?? null,
       onchain_first_tx_at: ws?.onchain_first_tx_at ?? null,
       wallet_age_days: ageAnchor ? daysBetween(ageAnchor) : null,
+      rank,
+      board_xp: userXp,
       xp: {
         holding_xp: Number(xp?.holding_xp ?? 0),
         wallet_age_xp: Number(xp?.wallet_age_xp ?? 0),
@@ -90,6 +117,7 @@ export async function GET() {
       },
       referral_as_referee: pending?.status ?? null,
       referrals_completed: Number(referrals?.c ?? 0),
+      estimate_next_drop: estimate,
     });
   } catch (err) {
     console.error("[me]", err);

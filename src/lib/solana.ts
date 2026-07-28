@@ -127,3 +127,108 @@ export function uiToRawApprox(ui: number): bigint {
   const decimals = getEnv().TOKEN_DECIMALS;
   return BigInt(Math.floor(ui * 10 ** decimals));
 }
+
+/** Native SOL balance (lamports → SOL). */
+export async function fetchSolBalance(walletAddress: string): Promise<number> {
+  const conn = connection();
+  const lamports = await conn.getBalance(new PublicKey(walletAddress), "confirmed");
+  return lamports / 1e9;
+}
+
+const PUMP_PROGRAM_ID = new PublicKey(
+  "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+);
+const PUMP_AMM_PROGRAM_ID = new PublicKey(
+  "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA",
+);
+const NATIVE_MINT = new PublicKey(
+  "So11111111111111111111111111111111111111112",
+);
+const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey(
+  "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+);
+
+/**
+ * Unclaimed pump.fun creator earnings for a creator wallet (claimable SOL).
+ * Matches OnlinePumpSdk.getCreatorVaultBalanceBothPrograms:
+ * bonding-curve creator-vault lamports − rent, plus AMM WSOL vault.
+ * Also checks fee-sharing shareholderUnclaimed when that system is used.
+ */
+export async function fetchCreatorUnclaimedFeesSol(
+  creatorAddress: string,
+): Promise<number> {
+  const creator = new PublicKey(creatorAddress);
+  const conn = connection();
+
+  const [pumpVault] = PublicKey.findProgramAddressSync(
+    [Buffer.from("creator-vault"), creator.toBuffer()],
+    PUMP_PROGRAM_ID,
+  );
+  const [ammAuthority] = PublicKey.findProgramAddressSync(
+    [Buffer.from("creator_vault"), creator.toBuffer()],
+    PUMP_AMM_PROGRAM_ID,
+  );
+  const [ammAta] = PublicKey.findProgramAddressSync(
+    [
+      ammAuthority.toBuffer(),
+      TOKEN_PROGRAM_ID.toBuffer(),
+      NATIVE_MINT.toBuffer(),
+    ],
+    ASSOCIATED_TOKEN_PROGRAM_ID,
+  );
+
+  const [vaultInfo, ammInfo, feeSharingSol] = await Promise.all([
+    conn.getAccountInfo(pumpVault, "confirmed"),
+    conn.getAccountInfo(ammAta, "confirmed"),
+    fetchFeeSharingUnclaimedSol(creatorAddress).catch(() => 0),
+  ]);
+
+  let pumpClaimable = 0;
+  if (vaultInfo) {
+    const rent = await conn.getMinimumBalanceForRentExemption(
+      vaultInfo.data.length,
+    );
+    pumpClaimable = Math.max(0, vaultInfo.lamports - rent) / 1e9;
+  }
+
+  let ammClaimable = 0;
+  if (ammInfo && ammInfo.data.length >= 72) {
+    // SPL token account: amount is u64 LE at offset 64
+    const amount = ammInfo.data.readBigUInt64LE(64);
+    ammClaimable = Number(amount) / 1e9;
+  }
+
+  const onChain = pumpClaimable + ammClaimable;
+  return Math.max(onChain, feeSharingSol);
+}
+
+async function fetchFeeSharingUnclaimedSol(
+  creatorAddress: string,
+): Promise<number> {
+  const res = await fetch(
+    `https://swap-api.pump.fun/v1/fee-sharing/account/${creatorAddress}/totals`,
+    {
+      headers: {
+        Accept: "application/json",
+        Origin: "https://pump.fun",
+        Referer: "https://pump.fun/",
+      },
+      cache: "no-store",
+    },
+  );
+  if (!res.ok) return 0;
+  const json = (await res.json()) as {
+    shareholderUnclaimed?: { sol?: string; lamports?: string };
+  };
+  const sol = json.shareholderUnclaimed?.sol;
+  if (typeof sol === "string" && sol.length > 0) {
+    const n = Number(sol);
+    if (Number.isFinite(n)) return n;
+  }
+  const lamports = json.shareholderUnclaimed?.lamports;
+  if (typeof lamports === "string" && lamports.length > 0) {
+    const n = Number(lamports);
+    if (Number.isFinite(n)) return n / 1e9;
+  }
+  return 0;
+}

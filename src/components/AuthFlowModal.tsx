@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { WalletReadyState } from "@solana/wallet-adapter-base";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import bs58 from "bs58";
 import { getStoredReferrer, notifyNavSession } from "./ConnectAuth";
 
@@ -35,9 +35,16 @@ const STEP_META: { id: StepId; label: string; hint: string }[] = [
 ];
 
 export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
-  const { publicKey, signMessage, connected, connecting, disconnect } =
-    useWallet();
-  const { setVisible } = useWalletModal();
+  const {
+    publicKey,
+    signMessage,
+    connected,
+    connecting,
+    disconnect,
+    wallets,
+    select,
+    connect,
+  } = useWallet();
   const [states, setStates] = useState<Record<StepId, StepState>>({
     wallet: "wait",
     sign: "wait",
@@ -45,7 +52,8 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
     done: "wait",
   });
   const [error, setError] = useState<string | null>(null);
-  const [detail, setDetail] = useState("Ready when you are.");
+  const [detail, setDetail] = useState("Pick a wallet to continue.");
+  const [pickError, setPickError] = useState<string | null>(null);
   const ranSign = useRef(false);
   const cancelled = useRef(false);
 
@@ -56,7 +64,8 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
   const reset = useCallback(() => {
     ranSign.current = false;
     setError(null);
-    setDetail("Ready when you are.");
+    setDetail("Pick a wallet to continue.");
+    setPickError(null);
     setStates({
       wallet: "wait",
       sign: "wait",
@@ -146,6 +155,30 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
     }
   }, [publicKey, signMessage, onAuthed, setStep]);
 
+  const connectWallet = useCallback(
+    async (walletName: (typeof wallets)[number]["adapter"]["name"]) => {
+      setPickError(null);
+      setStep("wallet", "active");
+      setDetail(`Connecting ${String(walletName)}…`);
+      try {
+        select(walletName);
+        await connect();
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Connection failed";
+        setPickError(msg);
+        setDetail("Connection failed. Try again or pick another wallet.");
+        setStep("wallet", "err");
+      }
+    },
+    [connect, select, setStep],
+  );
+
+  const availableWallets = wallets.filter(
+    (w) =>
+      w.readyState === WalletReadyState.Installed ||
+      w.readyState === WalletReadyState.Loadable,
+  );
+
   useEffect(() => {
     if (!open) return;
     cancelled.current = false;
@@ -156,8 +189,7 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
       void runSignAndSync();
     } else {
       setStep("wallet", "active");
-      setDetail("Opening wallet picker…");
-      setVisible(true);
+      setDetail("Pick a wallet to continue.");
     }
     return () => {
       cancelled.current = true;
@@ -201,7 +233,7 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
         <div className="auth-modal-head">
           <div>
             <p className="board-kicker">Wallet gate</p>
-            <h2 id="auth-modal-title">Connect &amp; sign in</h2>
+            <h2 id="auth-modal-title">Connect wallet</h2>
           </div>
           <button type="button" className="btn btn-ghost btn-sm" onClick={close}>
             Close
@@ -209,6 +241,49 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
         </div>
 
         <p className="auth-modal-live muted">{detail}</p>
+
+        {!connected && states.wallet !== "ok" && (
+          <div className="auth-wallet-picker">
+            {availableWallets.length === 0 ? (
+              <p className="muted small auth-wallet-empty">
+                No wallet detected. Install Phantom or Solflare, then refresh.
+              </p>
+            ) : (
+              <ul className="auth-wallet-list">
+                {availableWallets.map((w) => (
+                  <li key={w.adapter.name}>
+                    <button
+                      type="button"
+                      className="auth-wallet-btn"
+                      disabled={connecting}
+                      onClick={() => void connectWallet(w.adapter.name)}
+                    >
+                      {w.adapter.icon ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={w.adapter.icon}
+                          alt=""
+                          width={28}
+                          height={28}
+                          className="auth-wallet-icon"
+                        />
+                      ) : (
+                        <span className="auth-wallet-icon auth-wallet-icon-fallback" />
+                      )}
+                      <span className="auth-wallet-name">{w.adapter.name}</span>
+                      <span className="auth-wallet-tag">
+                        {w.readyState === WalletReadyState.Installed
+                          ? "Detected"
+                          : "Available"}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {pickError ? <p className="error small">{pickError}</p> : null}
+          </div>
+        )}
 
         <ol className="auth-steps">
           {STEP_META.map((s) => (
@@ -234,19 +309,6 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
         {error && <p className="error">{error}</p>}
 
         <div className="auth-modal-actions">
-          {!connected && (
-            <button
-              type="button"
-              className="btn btn-pill btn-buy"
-              onClick={() => {
-                setStep("wallet", "active");
-                setDetail("Opening wallet picker…");
-                setVisible(true);
-              }}
-            >
-              {connecting ? "Connecting…" : "Choose wallet"}
-            </button>
-          )}
           {connected && states.sign === "err" && (
             <button
               type="button"
@@ -279,7 +341,6 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
                 reset();
                 setStep("wallet", "active");
                 setDetail("Pick another wallet…");
-                setVisible(true);
               }}
             >
               Switch wallet

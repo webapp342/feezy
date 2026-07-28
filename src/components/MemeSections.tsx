@@ -64,6 +64,8 @@ export function LoreStrip() {
           className="lore-mascot lore-mascot-xl"
           width={720}
           height={720}
+          loading="lazy"
+          decoding="async"
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -72,6 +74,8 @@ export function LoreStrip() {
           className="lore-coin"
           width={160}
           height={160}
+          loading="lazy"
+          decoding="async"
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -80,6 +84,8 @@ export function LoreStrip() {
           className="lore-floater"
           width={180}
           height={180}
+          loading="lazy"
+          decoding="async"
         />
       </div>
       <div className="lore-text">
@@ -112,7 +118,7 @@ export function HowToBuy() {
             style={{ ["--tilt" as string]: `${s.tilt}deg` }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.img} alt="" className="howto-sticker-xl" />
+            <img src={s.img} alt="" className="howto-sticker-xl" loading="lazy" decoding="async" />
             <div className="howto-chip-body">
               <span className="howto-n">{s.n}</span>
               <strong>{s.title}</strong>
@@ -141,7 +147,7 @@ export function TokenomicsLite() {
         {loop.map((item, i) => (
           <div key={item.label} className="tok-step">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.img} alt="" className="tok-sticker-xl" />
+            <img src={item.img} alt="" className="tok-sticker-xl" loading="lazy" decoding="async" />
             <span className="muted small">{item.label}</span>
             <p className="tok-val">{item.value}</p>
             <p className="muted small">{item.note}</p>
@@ -154,22 +160,5 @@ export function TokenomicsLite() {
         ))}
       </div>
     </section>
-  );
-}
-
-export function PartnerBar() {
-  return (
-    <div className="partner-bar" aria-label="Links">
-      <a href={BRAND.buyUrl} target="_blank" rel="noreferrer">
-        pump.fun
-      </a>
-      <a href={BRAND.chartUrl} target="_blank" rel="noreferrer">
-        DexScreener
-      </a>
-      <a href={BRAND.solscanUrl} target="_blank" rel="noreferrer">
-        Solscan
-      </a>
-      <span>Solana</span>
-    </div>
   );
 }

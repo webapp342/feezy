@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 const REF_KEY = "cfs_ref";
@@ -31,11 +31,13 @@ type Props = {
   onLoggedOut: () => void;
 };
 
-/** Navbar session chip — no Select Wallet (connect lives in Sign in modal). */
+/** Navbar session chip — address opens menu with disconnect. */
 export function ConnectAuth({ onAuthed, onLoggedOut }: Props) {
   const { disconnect } = useWallet();
   const [authedWallet, setAuthedWallet] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -72,6 +74,7 @@ export function ConnectAuth({ onAuthed, onLoggedOut }: Props) {
         onAuthed();
       } else {
         setAuthedWallet(null);
+        setOpen(false);
         onLoggedOut();
       }
     };
@@ -79,7 +82,26 @@ export function ConnectAuth({ onAuthed, onLoggedOut }: Props) {
     return () => window.removeEventListener(SESSION_EVENT, handler);
   }, [onAuthed, onLoggedOut]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
   const logout = useCallback(async () => {
+    setOpen(false);
     await fetch("/api/auth", { method: "DELETE" });
     setAuthedWallet(null);
     notifyNavSession(null);
@@ -89,18 +111,32 @@ export function ConnectAuth({ onAuthed, onLoggedOut }: Props) {
 
   if (!mounted || !authedWallet) return null;
 
+  const short = `${authedWallet.slice(0, 4)}…${authedWallet.slice(-4)}`;
+
   return (
-    <div className="nav-session">
-      <span className="nav-chip mono" title={authedWallet}>
-        {authedWallet.slice(0, 4)}…{authedWallet.slice(-4)}
-      </span>
+    <div className="nav-session-menu" ref={menuRef}>
       <button
         type="button"
-        className="btn btn-ghost btn-nav"
-        onClick={logout}
+        className="nav-chip nav-chip-btn mono"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        title={authedWallet}
+        onClick={() => setOpen((v) => !v)}
       >
-        Log out
+        {short}
       </button>
+      {open ? (
+        <div className="nav-session-dropdown" role="menu">
+          <button
+            type="button"
+            className="nav-session-item"
+            role="menuitem"
+            onClick={() => void logout()}
+          >
+            Disconnect
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

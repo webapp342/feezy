@@ -3,8 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+import { formatEstSol } from "@/lib/snapshot-estimate";
 
-export type BoardEntry = { rank: number; wallet: string; xp: number };
+export type BoardEntry = {
+  rank: number;
+  wallet: string;
+  xp: number;
+  est_weighted_sol?: number | null;
+  est_random_sol?: number;
+};
 
 type Props = {
   refreshKey?: number;
@@ -20,6 +27,14 @@ function shortWallet(w: string) {
   return `${w.slice(0, 4)}…${w.slice(-4)}`;
 }
 
+function teaserPayout(e: BoardEntry): string {
+  if (e.est_weighted_sol != null) return formatEstSol(e.est_weighted_sol);
+  if (e.est_random_sol != null && e.est_random_sol > 0) {
+    return `${formatEstSol(e.est_random_sol)}†`;
+  }
+  return "—";
+}
+
 export function Leaderboard({
   refreshKey = 0,
   limit,
@@ -28,6 +43,7 @@ export function Leaderboard({
   className = "",
 }: Props) {
   const [entries, setEntries] = useState<BoardEntry[]>([]);
+  const [poolSol, setPoolSol] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,6 +57,7 @@ export function Leaderboard({
       let list = json.data.entries as BoardEntry[];
       if (limit && limit > 0) list = list.slice(0, limit);
       setEntries(list);
+      setPoolSol(Number(json.data.pool_sol ?? 0));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load");
     } finally {
@@ -54,22 +71,21 @@ export function Leaderboard({
 
   if (variant === "teaser") {
     const top = entries.slice(0, 5);
-    const leader = top[0];
-    const maxXp = leader?.xp || 1;
 
     return (
       <section className={`board-teaser ${className}`} id="board-preview">
-        <div className="board-stage">
+        <div className="board-stage board-stage-pro">
           <div className="board-stage-top">
             <div>
               <p className="board-kicker">Live ranks</p>
               <h2 className="board-stage-title">XP Board</h2>
               <p className="board-stage-sub">
-                Heaviest bags before the next random fee snapshot.
+                XP-weighted payout at the next snapshot
+                {poolSol > 0 ? ` · pool ${formatEstSol(poolSol)}` : ""}.
               </p>
             </div>
-            <Link className="btn btn-pill btn-buy board-stage-cta" href="/board">
-              Open full board
+            <Link className="btn btn-pill btn-buy btn-nav board-stage-cta" href="/board">
+              Full board
             </Link>
           </div>
 
@@ -83,61 +99,72 @@ export function Leaderboard({
           )}
 
           {top.length > 0 && (
-            <ol className="board-ranklist">
-              {top.map((e) => {
-                const pct = Math.max(6, Math.round((e.xp / maxXp) * 100));
-                const isLead = e.rank === 1;
-                return (
-                  <li
-                    key={e.wallet}
-                    className={[
-                      "board-rankrow",
-                      isLead ? "is-lead" : "",
-                      highlightWallet === e.wallet ? "is-you" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    <span className={`board-ranknum rank-tone-${Math.min(e.rank, 4)}`}>
-                      {e.rank}
-                    </span>
-                    <div className="board-rankmeta">
-                      <div className="board-rankline">
-                        <code className="mono board-rankwallet">
-                          {shortWallet(e.wallet)}
-                        </code>
-                        {isLead ? (
-                          <span className="board-lead-tag">Leading</span>
-                        ) : null}
-                        {highlightWallet === e.wallet ? (
-                          <span className="board-you-tag">You</span>
-                        ) : null}
-                      </div>
-                      <div className="board-bar" aria-hidden>
-                        <span style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                    <div className="board-rankxp">
-                      <strong>{e.xp.toLocaleString()}</strong>
-                      <span>XP</span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
+            <div className="board-teaser-table">
+              <table className="board-teaser-grid">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Wallet</th>
+                    <th scope="col" className="num">
+                      XP
+                    </th>
+                    <th scope="col" className="num">
+                      Est. payout
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {top.map((e) => {
+                    const isLead = e.rank === 1;
+                    return (
+                      <tr
+                        key={e.wallet}
+                        className={[
+                          isLead ? "is-lead" : "",
+                          highlightWallet === e.wallet ? "is-you" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      >
+                        <td>
+                          <span
+                            className={`board-ranknum rank-tone-${Math.min(e.rank, 4)}`}
+                          >
+                            {e.rank}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="board-rankline board-rankline-pro">
+                            <code className="mono board-rankwallet">
+                              {shortWallet(e.wallet)}
+                            </code>
+                            {isLead ? (
+                              <span className="board-lead-tag">Lead</span>
+                            ) : null}
+                            {highlightWallet === e.wallet ? (
+                              <span className="board-you-tag">You</span>
+                            ) : null}
+                          </div>
+                        </td>
+                        <td className="num board-rankxp-pro">
+                          <strong>{e.xp.toLocaleString()}</strong>
+                        </td>
+                        <td className="num board-rankpayout">
+                          {poolSol > 0 ? teaserPayout(e) : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
 
-          <div className="board-stage-foot">
-            <p className="muted small">
-              Sync bag · clear raids · climb before the drop
+          {poolSol > 0 && top.length > 0 && (
+            <p className="muted small board-teaser-foot">
+              Est. payout from current fee pool · top 80 by XP · † random slot
             </p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={BRAND.images.stickers.point}
-              alt=""
-              className="board-stage-sticker"
-            />
-          </div>
+          )}
         </div>
       </section>
     );
@@ -150,6 +177,8 @@ export function Leaderboard({
         src={BRAND.images.stickers.laugh}
         alt=""
         className="panel-sticker panel-sticker-lg"
+        loading="lazy"
+        decoding="async"
       />
       <div className="row between">
         <h2>XP Board</h2>
@@ -158,7 +187,8 @@ export function Leaderboard({
         </button>
       </div>
       <p className="muted small">
-        Who&apos;s heaviest before the next fee snapshot.
+        XP-weighted fee share at next snapshot
+        {poolSol > 0 ? ` · pool ${formatEstSol(poolSol)}` : ""}.
       </p>
       {loading && <p className="muted">Loading…</p>}
       {error && <p className="error">{error}</p>}
@@ -166,12 +196,14 @@ export function Leaderboard({
         <p className="muted">No scores yet. Sign in and sync to show up.</p>
       )}
       {entries.length > 0 && (
+        <div className="board-table-wrap">
         <table className="table board-table">
           <thead>
             <tr>
               <th>#</th>
               <th>Wallet</th>
               <th>XP</th>
+              {poolSol > 0 ? <th className="board-est-col">Est. payout</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -193,10 +225,34 @@ export function Leaderboard({
                 </td>
                 <td className="mono">{shortWallet(e.wallet)}</td>
                 <td>{e.xp.toLocaleString()}</td>
+                {poolSol > 0 ? (
+                  <td className="board-est-cell">
+                    {e.est_weighted_sol != null ? (
+                      <span title="XP-weighted payout (top 80)">
+                        {formatEstSol(e.est_weighted_sol)}
+                      </span>
+                    ) : e.est_random_sol != null && e.est_random_sol > 0 ? (
+                      <span
+                        className="muted small"
+                        title="Random payout slot (outside top 80)"
+                      >
+                        {formatEstSol(e.est_random_sol)}†
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
+      )}
+      {poolSol > 0 && entries.length > 0 && (
+        <p className="muted small board-est-foot">
+          Est. payout from current fee pool · top 80 by XP · † random slot
+        </p>
       )}
     </div>
   );

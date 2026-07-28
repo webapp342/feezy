@@ -8,7 +8,7 @@ type Props = {
   className?: string;
 };
 
-/** Single CTA: opens modal → connect wallet → auto sign-in → sync. */
+/** Opens modal → connect wallet → auto sign → sync. */
 export function SignInButton({ onAuthed, className = "btn" }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -19,11 +19,8 @@ export function SignInButton({ onAuthed, className = "btn" }: Props) {
         className={className}
         onClick={() => setOpen(true)}
       >
-        Connect &amp; sign in
+        Connect wallet
       </button>
-      <p className="muted small">
-        One tap — wallet connect, sign, sync bag.
-      </p>
       <AuthFlowModal
         open={open}
         onClose={() => setOpen(false)}

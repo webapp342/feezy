@@ -65,6 +65,19 @@ export async function getLeaderboard(
   return entries;
 }
 
+/** 1-based rank, or null if wallet is not on the board yet. */
+export async function getWalletRank(
+  walletAddress: string,
+): Promise<{ rank: number; xp: number } | null> {
+  const redis = getRedis();
+  const [rank0, score] = await Promise.all([
+    redis.zrevrank(LEADERBOARD_KEY, walletAddress),
+    redis.zscore(LEADERBOARD_KEY, walletAddress),
+  ]);
+  if (rank0 == null || score == null) return null;
+  return { rank: Number(rank0) + 1, xp: Number(score) };
+}
+
 /** Simple Redis rate limit: returns true if allowed. */
 export async function rateLimitAllow(
   key: string,

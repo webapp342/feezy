@@ -7,6 +7,7 @@ import { SiteChrome, useAuthGate } from "./SiteChrome";
 import { Leaderboard } from "./Leaderboard";
 import { TasksPanel } from "./TasksPanel";
 import { UserStats } from "./UserStats";
+import { RewardsPanel } from "./RewardsPanel";
 
 export function BoardShell() {
   const { refreshKey, authed, bump, onAuthed, onLoggedOut } = useAuthGate();
@@ -33,14 +34,12 @@ export function BoardShell() {
   return (
     <SiteChrome active="board" onAuthed={onAuthed} onLoggedOut={onLoggedOut}>
       <main className="page board-page">
-        <header className="board-hero">
+        <header className="board-hero board-hero-compact">
           <div className="board-hero-copy">
-            <p className="board-kicker">Main loop</p>
+            <p className="board-kicker">Fee loop</p>
             <h1 className="board-title">XP Board</h1>
-            <p className="section-sub">
-              Snapshot share follows XP weight. Sync your bag, clear raids,
-              refer frens — show up heavy when creator fees drop (3× daily,
-              random times).
+            <p className="board-hero-lead">
+              Hold ${BRAND.symbol}, stack XP, catch creator-fee snapshots.
             </p>
             <div className="board-hero-actions">
               <a className="btn btn-pill btn-buy" href="#your-bag">
@@ -51,12 +50,9 @@ export function BoardShell() {
               </Link>
             </div>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={BRAND.images.gifs.xp}
-            alt=""
-            className="board-hero-mascot"
-          />
+          <div className="board-hero-rewards">
+            <RewardsPanel refreshKey={refreshKey} />
+          </div>
         </header>
 
         <section className="board-layout">
@@ -67,14 +63,12 @@ export function BoardShell() {
               highlightWallet={meWallet}
             />
           </div>
-          <aside className="board-side">
-            <div id="your-bag">
-              <UserStats
-                refreshKey={refreshKey}
-                authed={authed}
-                onAuthed={onAuthed}
-              />
-            </div>
+          <aside className="board-dash">
+            <UserStats
+              refreshKey={refreshKey}
+              authed={authed}
+              onAuthed={onAuthed}
+            />
             <TasksPanel
               refreshKey={refreshKey}
               authed={authed}

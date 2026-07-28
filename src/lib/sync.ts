@@ -169,7 +169,7 @@ export async function syncWallet(params: {
   const existingAgeXp = Number(xpRow?.wallet_age_xp ?? 0);
 
   let referralCompleted = false;
-  if (balanceUi >= env.REFERRAL_THRESHOLD_BALANCE) {
+  if (balanceUi > 0) {
     referralCompleted = await completeReferralIfNeeded(user.id);
     if (referralCompleted) {
       const fresh = firstRow<{ referral_xp: number }>(

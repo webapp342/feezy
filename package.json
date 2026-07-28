@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/optimize-brand-assets.js && next build",
+    "optimize:brand": "node scripts/optimize-brand-assets.js",
     "start": "next start",
     "lint": "eslint"
   },

@@ -39,7 +39,7 @@ export function TasksPanel({ refreshKey, onChanged, authed }: Props) {
 
   const complete = async (taskId: string) => {
     if (!authed) {
-      setError("Sign in first.");
+      setError("Connect wallet first.");
       return;
     }
     setBusyId(taskId);
@@ -61,38 +61,48 @@ export function TasksPanel({ refreshKey, onChanged, authed }: Props) {
     }
   };
 
+  const done = tasks.filter((t) => t.completed).length;
+
   return (
-    <div className="panel">
-      <h2>Raids</h2>
-      <p className="muted small">
-        Extra XP weight for the next fee snapshot. Each raid once per wallet.
-      </p>
-      {error && <p className="error">{error}</p>}
-      <ul className="list">
+    <section className="board-card">
+      <header className="board-card-head">
+        <div>
+          <h2 className="board-card-title">Raids</h2>
+          <p className="board-card-desc">
+            One-time tasks. Each adds XP before the next fee drop.
+          </p>
+        </div>
+        {tasks.length > 0 && (
+          <span className="board-pill">
+            {done}/{tasks.length}
+          </span>
+        )}
+      </header>
+
+      {error && <p className="error small">{error}</p>}
+
+      <ul className="board-list">
         {tasks.map((t) => (
-          <li key={t.id} className="list-row">
-            <div>
+          <li key={t.id} className="board-list-row">
+            <div className="board-list-main">
               <strong>{t.title}</strong>
-              <div className="muted small mono">{t.type}</div>
-            </div>
-            <div className="row gap">
               <span className="badge">+{t.reward_xp} XP</span>
-              {t.completed ? (
-                <span className="muted small">Done</span>
-              ) : (
-                <button
-                  type="button"
-                  className="btn"
-                  disabled={!authed || busyId === t.id}
-                  onClick={() => complete(t.id)}
-                >
-                  {busyId === t.id ? "…" : "Claim"}
-                </button>
-              )}
             </div>
+            {t.completed ? (
+              <span className="board-done">Done</span>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-sm"
+                disabled={!authed || busyId === t.id}
+                onClick={() => complete(t.id)}
+              >
+                {busyId === t.id ? "…" : "Claim"}
+              </button>
+            )}
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }

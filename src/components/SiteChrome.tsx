@@ -39,7 +39,7 @@ export function SiteChrome({
               width={48}
               height={48}
               className="nav-logo"
-              unoptimized
+              sizes="48px"
             />
             <div className="nav-brand-text">
               <p className="nav-brand-title">${BRAND.symbol}</p>
@@ -59,14 +59,8 @@ export function SiteChrome({
           </div>
 
           <div className="nav-actions">
-            <Link
-              className={`btn btn-pill btn-nav-board ${active === "board" ? "is-on" : ""}`}
-              href="/board"
-            >
-              XP Board
-            </Link>
             <a
-              className="btn btn-pill btn-buy btn-nav-buy"
+              className="btn btn-pill btn-buy btn-nav btn-nav-buy"
               href={BRAND.buyUrl}
               target="_blank"
               rel="noreferrer"
@@ -89,7 +83,7 @@ export function SiteChrome({
             width={36}
             height={36}
             className="nav-logo"
-            unoptimized
+            sizes="36px"
           />
           <div>
             <strong>${BRAND.symbol}</strong>

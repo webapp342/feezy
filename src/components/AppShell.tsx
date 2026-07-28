@@ -5,7 +5,6 @@ import { Hero } from "./Hero";
 import {
   HowToBuy,
   LoreStrip,
-  PartnerBar,
   TokenomicsLite,
 } from "./MemeSections";
 import { Leaderboard } from "./Leaderboard";
@@ -19,7 +18,6 @@ export function AppShell() {
     <SiteChrome active="home" onAuthed={onAuthed} onLoggedOut={onLoggedOut}>
       <div id="top">
         <Hero />
-        <PartnerBar />
       </div>
 
       <main className="page">
@@ -40,6 +38,8 @@ export function AppShell() {
               src={BRAND.images.gifs.feeDrop}
               alt=""
               className="earn-cta-gif"
+              loading="lazy"
+              decoding="async"
             />
             <div>
               <h2 className="section-title">Ready to stack weight?</h2>

@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       { pathname: "/brand/**", search: "*" },
       { pathname: "/brand/**" },
     ],
+    formats: ["image/webp", "image/avif"],
   },
   transpilePackages: [
     "@solana/wallet-adapter-base",

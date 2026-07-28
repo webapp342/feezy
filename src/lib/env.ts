@@ -13,11 +13,16 @@ const envSchema = z.object({
   HOLDING_XP_DIVISOR: z.coerce.number().positive().default(1),
   WALLET_AGE_XP_PER_DAY: z.coerce.number().int().min(0).default(5),
   WALLET_AGE_XP_CAP: z.coerce.number().int().min(0).default(500),
-  REFERRAL_THRESHOLD_BALANCE: z.coerce.number().nonnegative().default(500),
   REFERRAL_XP_REFERRER: z.coerce.number().int().min(0).default(20000),
   REFERRAL_XP_REFEREE: z.coerce.number().int().min(0).default(20000),
   SYNC_COOLDOWN_SECONDS: z.coerce.number().int().min(0).default(60),
   LEADERBOARD_LIMIT: z.coerce.number().int().min(1).max(500).default(100),
+  /** Creator wallet — unclaimed pump.fun creator earnings shown as current rewards. */
+  CREATOR_WALLET: z
+    .string()
+    .min(32)
+    .max(64)
+    .default("F3Z961xu1uaBgLcyJZnXzmP4aJiyoFAqGPYiDrz7LMy5"),
 });
 
 export type ServerEnv = z.infer<typeof envSchema>;

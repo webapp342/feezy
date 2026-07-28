@@ -1,10 +1,10 @@
 /** Public brand config — Feezy v2 kit (charcoal fur, product GIFs). */
 
 const MINT = "FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump";
-/** Bump when kit assets change. */
-const V = "8";
+/** Bump when kit / opt assets change. */
+const V = "9";
 
-function kit(path: string) {
+function asset(path: string) {
   return `${path}?v=${V}`;
 }
 
@@ -18,32 +18,38 @@ export const BRAND = {
     process.env.NEXT_PUBLIC_CHART_URL ||
     `https://dexscreener.com/solana/${MINT}`,
   solscanUrl: `https://solscan.io/token/${MINT}`,
+  creatorWallet:
+    process.env.NEXT_PUBLIC_CREATOR_WALLET ||
+    "F3Z961xu1uaBgLcyJZnXzmP4aJiyoFAqGPYiDrz7LMy5",
   xUrl: process.env.NEXT_PUBLIC_X_URL || "",
   telegramUrl: process.env.NEXT_PUBLIC_TELEGRAM_URL || "",
+  referral: {
+    xpEach: Number(process.env.NEXT_PUBLIC_REFERRAL_XP_EACH || 20000),
+  },
   images: {
-    logo: kit("/brand/kit/feezy-canonical-logo.png"),
-    mascot: kit("/brand/kit/feezy-sticker-point.png"),
-    /** Product motion: random fee drop → catch → celebrate */
-    hero: kit("/brand/kit/feezy-fee-drop.gif"),
-    bounce: kit("/brand/kit/feezy-bounce.gif"),
-    coin: kit("/brand/kit/feezy-coin.png"),
+    logo: asset("/brand/opt/logo-96.webp"),
+    logoLg: asset("/brand/opt/logo-192.webp"),
+    mascot: asset("/brand/opt/sticker-point-160.webp"),
+    hero: asset("/brand/kit/feezy-fee-drop.gif"),
+    bounce: asset("/brand/kit/feezy-bounce.gif"),
+    coin: asset("/brand/opt/coin-160.webp"),
     gifs: {
-      feeDrop: kit("/brand/kit/feezy-fee-drop.gif"),
-      eat: kit("/brand/kit/feezy-eat-loop.gif"),
-      xp: kit("/brand/kit/feezy-xp-loop.gif"),
-      timer: kit("/brand/kit/feezy-timer-loop.gif"),
+      feeDrop: asset("/brand/kit/feezy-fee-drop.gif"),
+      eat: asset("/brand/kit/feezy-eat-loop.gif"),
+      xp: asset("/brand/kit/feezy-xp-loop.gif"),
+      timer: asset("/brand/kit/feezy-timer-loop.gif"),
     },
     stickers: {
-      point: kit("/brand/kit/feezy-sticker-point.png"),
-      laugh: kit("/brand/kit/feezy-sticker-laugh.png"),
-      bags: kit("/brand/kit/feezy-sticker-bags.png"),
-      eat: kit("/brand/kit/feezy-sticker-eat.png"),
-      shush: kit("/brand/kit/feezy-sticker-shush.png"),
-      timer: kit("/brand/kit/feezy-sticker-timer.png"),
-      xp: kit("/brand/kit/feezy-sticker-xp.png"),
-      logo: kit("/brand/kit/feezy-canonical-logo.png"),
+      point: asset("/brand/opt/sticker-point-160.webp"),
+      laugh: asset("/brand/opt/sticker-laugh-180.webp"),
+      bags: asset("/brand/opt/sticker-bags-200.webp"),
+      eat: asset("/brand/opt/eat-480.webp"),
+      shush: asset("/brand/kit/feezy-sticker-shush.png"),
+      timer: asset("/brand/kit/feezy-sticker-timer.png"),
+      xp: asset("/brand/kit/feezy-sticker-xp.png"),
+      logo: asset("/brand/opt/logo-96.webp"),
     },
-    bg: kit("/brand/feezy-bg-hero.png"),
+    bg: asset("/brand/opt/bg-hero.webp"),
     markSvg: "/brand/kit/icons/feezy-mark.svg",
   },
 } as const;
