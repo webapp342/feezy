@@ -20,13 +20,10 @@ type Me = {
   board_xp: number;
   xp: {
     holding_xp: number;
-    wallet_age_xp: number;
     task_xp: number;
     referral_xp: number;
     total_xp: number;
   };
-  wallet_age_days: number | null;
-  onchain_first_tx_at: string | null;
   referrals_completed: number;
   last_sync: string | null;
   estimate_next_drop?: SnapshotEstimate;
@@ -45,47 +42,53 @@ export function UserStats({ refreshKey, authed, onAuthed }: Props) {
   const [syncing, setSyncing] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
+  const loadMe = async () => {
+    const res = await fetch("/api/me");
+    const json = await res.json();
+    if (json.ok) {
+      setMe(json.data as Me);
+      const origin = window.location.origin;
+      setLink(`${origin}/?ref=${json.data.wallet}`);
+    }
+  };
+
+  const runSync = async (manual: boolean) => {
+    setSyncing(true);
+    if (manual) setMsg(null);
+    try {
+      const res = await fetch("/api/sync-wallet", { method: "POST" });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "Sync failed");
+      if (manual) {
+        setMsg(
+          json.data.skipped
+            ? "Cooldown — try again later"
+            : `Synced · ${json.data.xp.total_xp.toLocaleString()} XP`,
+        );
+      }
+      await loadMe();
+    } catch (e) {
+      if (manual) {
+        setMsg(e instanceof Error ? e.message : "Sync failed");
+      } else {
+        // Still show cached profile if auto-sync fails (cooldown, RPC, etc.)
+        await loadMe();
+      }
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   useEffect(() => {
     if (!authed) {
       setMe(null);
       return;
     }
-    void (async () => {
-      const res = await fetch("/api/me");
-      const json = await res.json();
-      if (json.ok) {
-        setMe(json.data as Me);
-        const origin = window.location.origin;
-        setLink(`${origin}/?ref=${json.data.wallet}`);
-      }
-    })();
+    void runSync(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed, refreshKey]);
 
-  const sync = async () => {
-    setSyncing(true);
-    setMsg(null);
-    try {
-      const res = await fetch("/api/sync-wallet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "full" }),
-      });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || "Sync failed");
-      setMsg(
-        json.data.skipped
-          ? `Cooldown — try again later`
-          : `Synced · ${json.data.xp.total_xp.toLocaleString()} XP`,
-      );
-      const meRes = await fetch("/api/me");
-      const meJson = await meRes.json();
-      if (meJson.ok) setMe(meJson.data as Me);
-    } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Sync failed");
-    } finally {
-      setSyncing(false);
-    }
-  };
+  const sync = () => void runSync(true);
 
   const copy = async () => {
     if (!link) return;
@@ -101,7 +104,7 @@ export function UserStats({ refreshKey, authed, onAuthed }: Props) {
           <div>
             <h2 className="board-card-title">Your bag</h2>
             <p className="board-card-desc">
-              Connect to track ${BRAND.symbol} balance and XP weight.
+              Connect to see how much ${BRAND.symbol} you hold and your weight.
             </p>
           </div>
         </header>
@@ -116,7 +119,7 @@ export function UserStats({ refreshKey, authed, onAuthed }: Props) {
         <div>
           <h2 className="board-card-title">Your bag</h2>
           <p className="board-card-desc">
-            XP weight decides your share when fees drop.
+            What you hold + raids + refs = your snapshot weight.
           </p>
         </div>
         <button
@@ -128,6 +131,10 @@ export function UserStats({ refreshKey, authed, onAuthed }: Props) {
           {syncing ? "Syncing…" : "Sync"}
         </button>
       </header>
+
+      {syncing && !me ? (
+        <p className="muted small">Pulling on-chain balance…</p>
+      ) : null}
 
       {me && (
         <>
@@ -178,29 +185,36 @@ export function UserStats({ refreshKey, authed, onAuthed }: Props) {
             </div>
           )}
 
-          <div className="board-xp-grid">
-            <div className="board-xp-cell board-holding-cell">
-              <div className="board-token-label">
-                <Image
-                  src={BRAND.images.logo}
-                  alt=""
-                  width={18}
-                  height={18}
-                  className="board-token-icon"
-                  sizes="18px"
-                />
-                <span className="muted small">${BRAND.symbol}</span>
-              </div>
-              <strong>
-                {me.balance_ui.toLocaleString(undefined, {
-                  maximumFractionDigits: 0,
-                })}
-              </strong>
+          <div className="board-held-block">
+            <div className="board-held-head">
+              <Image
+                src={BRAND.images.logo}
+                alt=""
+                width={20}
+                height={20}
+                className="board-token-icon"
+                sizes="20px"
+              />
+              <span className="board-stat-label">Held</span>
             </div>
-            <div className="board-xp-cell">
-              <span className="muted small">Wallet Age XP</span>
-              <strong>{me.xp.wallet_age_xp.toLocaleString()}</strong>
-            </div>
+            <p className="board-held-value">
+              {me.balance_ui.toLocaleString(undefined, {
+                maximumFractionDigits: 0,
+              })}{" "}
+              <span className="board-held-unit">${BRAND.symbol}</span>
+            </p>
+            <p className="muted small board-held-sub">
+              In this wallet · synced from chain
+            </p>
+            {me.balance_ui <= 0 ? (
+              <p className="muted small board-held-hint">
+                Nothing here yet — hold ${BRAND.symbol} in this wallet to stack
+                XP weight for fee drops.
+              </p>
+            ) : null}
+          </div>
+
+          <div className="board-xp-grid board-xp-grid-duo">
             <div className="board-xp-cell">
               <span className="muted small">Raids XP</span>
               <strong>{me.xp.task_xp.toLocaleString()}</strong>

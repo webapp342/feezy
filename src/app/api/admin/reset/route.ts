@@ -42,8 +42,7 @@ export async function POST(req: Request) {
     await sql`
       UPDATE wallet_state SET
         old_balance = 0,
-        last_sync = NOW(),
-        onchain_first_tx_at = NULL
+        last_sync = NOW()
     `;
 
     await redis.del(LEADERBOARD_KEY);

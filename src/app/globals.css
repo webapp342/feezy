@@ -2042,6 +2042,51 @@ a:hover {
   margin-bottom: 0.85rem;
 }
 
+.board-xp-grid-duo {
+  margin-top: 0.45rem;
+}
+
+.board-held-block {
+  margin-bottom: 0.45rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--yellow) 28%, var(--line));
+  background: color-mix(in srgb, var(--yellow) 5%, var(--bg-deep));
+}
+
+.board-held-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.board-held-value {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.35rem;
+  line-height: 1.15;
+  color: var(--yellow);
+}
+
+.board-held-unit {
+  font-size: 0.85em;
+  font-family: var(--sans);
+  font-weight: 600;
+  color: color-mix(in srgb, var(--yellow) 75%, var(--ink));
+}
+
+.board-held-sub {
+  margin: 0.2rem 0 0;
+}
+
+.board-held-hint {
+  margin: 0.45rem 0 0;
+  padding-top: 0.45rem;
+  border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  line-height: 1.35;
+}
+
 .board-xp-cell {
   display: flex;
   flex-direction: column;

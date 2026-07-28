@@ -12,41 +12,6 @@ function connection(): Connection {
   return new Connection(getEnv().SOLANA_RPC_URL, "confirmed");
 }
 
-/**
- * Oldest on-chain activity (first signature blockTime).
- * Result should be cached in Postgres — scanning history is RPC-heavy.
- * Caps pagination so free RPC / serverless timeouts stay safe
- * (very active wallets may get a conservative lower-bound age).
- */
-export async function fetchWalletFirstActivityAt(
-  walletAddress: string,
-): Promise<Date | null> {
-  const conn = connection();
-  const pubkey = new PublicKey(walletAddress);
-  const MAX_PAGES = 5; // 5k sigs max — free RPC + UX; cached forever after first sync
-  let before: string | undefined;
-  let oldestBlockTime: number | null = null;
-
-  for (let page = 0; page < MAX_PAGES; page++) {
-    const sigs = await conn.getSignaturesForAddress(pubkey, {
-      limit: 1000,
-      ...(before ? { before } : {}),
-    });
-    if (sigs.length === 0) break;
-
-    const last = sigs[sigs.length - 1];
-    if (typeof last.blockTime === "number") {
-      oldestBlockTime = last.blockTime;
-    }
-
-    if (sigs.length < 1000) break;
-    before = last.signature;
-  }
-
-  if (oldestBlockTime == null) return null;
-  return new Date(oldestBlockTime * 1000);
-}
-
 async function resolveTokenProgramId(
   conn: Connection,
   mint: PublicKey,

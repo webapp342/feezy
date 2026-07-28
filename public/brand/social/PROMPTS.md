@@ -14,9 +14,19 @@ Same character as FEEZY canonical logo: raccoon mascot, neon lime mohawk and che
 Square profile avatar. Close-up head portrait of Feezy only. Solid deep purple #14002B background. Centered for circular crop. No text, no props, no full body.
 ```
 
-## X banner (16:9 → crop 1500×500)
+## X banner (1500×500 native — 3:1)
 ```
-Wide header. Full body Feezy on RIGHT. LEFT/CENTER open dark cosmic purple for safe zone (X avatar covers bottom-left). Lime hoodie $FEE, ripped jeans, green sneakers. No text overlays, no Solana logo.
+Exact X header canvas 1500×500 pixels, 3:1 aspect ratio. NOT 16:9.
+
+SAFE ZONES (critical):
+- Bottom-left ~400×220px: EMPTY — only nebula/stars (profile avatar overlaps here on desktop)
+- Top 55px + bottom 55px: bleed only, no text
+- Safe content band: center-right (~x 250–1400, y 60–380)
+
+Layout: $FEEZY headline upper-left (above avatar zone), taglines mid-left, Feezy full body RIGHT third pointing at text. Shallow horizontal composition — one wide row, not tall scene.
+
+After AI: node scripts/banner-to-x.js public/brand/social/masters/x-banner-ai.png
+(Do NOT use resize-social-pack centre crop for banner.)
 ```
 
 ## X launch post (16:9)

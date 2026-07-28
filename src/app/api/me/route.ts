@@ -6,7 +6,6 @@ import { getLeaderboard, getWalletRank } from "@/lib/redis";
 import { estimateSnapshotEarnings } from "@/lib/snapshot-estimate";
 import { SNAPSHOT_RULES, effectiveSnapshotPool } from "@/lib/snapshot-rules";
 import { fetchCreatorUnclaimedFeesSol, rawToUiAmount } from "@/lib/solana";
-import { daysBetween } from "@/lib/xp";
 
 export const runtime = "nodejs";
 
@@ -35,25 +34,19 @@ export async function GET() {
 
     const xp = firstRow<{
       holding_xp: number;
-      wallet_age_xp: number;
       task_xp: number;
       referral_xp: number;
       total_xp: number;
       updated_at: string;
     }>(
       await sql`
-        SELECT holding_xp, wallet_age_xp, task_xp, referral_xp, total_xp, updated_at
+        SELECT holding_xp, task_xp, referral_xp, total_xp, updated_at
         FROM xp_state WHERE user_id = ${session.sub}
       `,
     );
-    const ws = firstRow<{
-      old_balance: string;
-      last_sync: string;
-      onchain_first_tx_at: string | null;
-    }>(
+    const ws = firstRow<{ old_balance: string; last_sync: string }>(
       await sql`
-        SELECT old_balance, last_sync, onchain_first_tx_at
-        FROM wallet_state WHERE user_id = ${session.sub}
+        SELECT old_balance, last_sync FROM wallet_state WHERE user_id = ${session.sub}
       `,
     );
 
@@ -69,10 +62,6 @@ export async function GET() {
         WHERE referrer_id = ${session.sub} AND status = 'completed'
       `,
     );
-
-    const ageAnchor = ws?.onchain_first_tx_at
-      ? new Date(ws.onchain_first_tx_at)
-      : null;
 
     const balanceRaw = BigInt(String(ws?.old_balance ?? 0));
     const balanceUi = rawToUiAmount(balanceRaw);
@@ -104,13 +93,10 @@ export async function GET() {
       balance_raw: balanceRaw.toString(),
       balance_ui: balanceUi,
       last_sync: ws?.last_sync ?? null,
-      onchain_first_tx_at: ws?.onchain_first_tx_at ?? null,
-      wallet_age_days: ageAnchor ? daysBetween(ageAnchor) : null,
       rank,
       board_xp: userXp,
       xp: {
         holding_xp: Number(xp?.holding_xp ?? 0),
-        wallet_age_xp: Number(xp?.wallet_age_xp ?? 0),
         task_xp: Number(xp?.task_xp ?? 0),
         referral_xp: Number(xp?.referral_xp ?? 0),
         total_xp: Number(xp?.total_xp ?? 0),

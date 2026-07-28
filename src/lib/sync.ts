@@ -4,12 +4,8 @@ import { rateLimitAllow, setLeaderboardScore } from "./redis";
 import {
   fetchMintDecimals,
   fetchTokenBalanceRaw,
-  fetchWalletFirstActivityAt,
   rawToUiAmount,
 } from "./solana";
-import { daysBetween } from "./xp";
-
-export type SyncMode = "balance" | "full";
 
 export type SyncResult = {
   wallet: string;
@@ -17,11 +13,8 @@ export type SyncResult = {
   balance_raw: string;
   skipped: boolean;
   reason?: string;
-  mode: SyncMode;
-  wallet_age_days?: number;
   xp: {
     holding_xp: number;
-    wallet_age_xp: number;
     task_xp: number;
     referral_xp: number;
     total_xp: number;
@@ -36,20 +29,15 @@ type UserRow = {
   created_at: string;
 };
 
-/**
- * balance — RPC: token balance only. Age/task/referral from DB.
- * full    — same + discover on-chain first tx once if not cached.
- */
+/** RPC: token balance only. Task/referral XP from DB. */
 export async function syncWallet(params: {
   userId: string;
   walletAddress: string;
-  mode?: SyncMode;
   force?: boolean;
 }): Promise<SyncResult> {
   const env = getEnv();
   const sql = getDb();
   const wallet = params.walletAddress;
-  const mode: SyncMode = params.mode ?? "balance";
 
   if (!params.force) {
     const allowed = await rateLimitAllow(
@@ -59,40 +47,29 @@ export async function syncWallet(params: {
     if (!allowed) {
       const xp = firstRow<{
         holding_xp: number;
-        wallet_age_xp: number;
         task_xp: number;
         referral_xp: number;
         total_xp: number;
       }>(
         await sql`
-          SELECT holding_xp, wallet_age_xp, task_xp, referral_xp, total_xp
+          SELECT holding_xp, task_xp, referral_xp, total_xp
           FROM xp_state WHERE user_id = ${params.userId}
         `,
       );
-      const ws = firstRow<{
-        old_balance: string;
-        onchain_first_tx_at: string | null;
-      }>(
+      const ws = firstRow<{ old_balance: string }>(
         await sql`
-          SELECT old_balance, onchain_first_tx_at
-          FROM wallet_state WHERE user_id = ${params.userId}
+          SELECT old_balance FROM wallet_state WHERE user_id = ${params.userId}
         `,
       );
       const raw = BigInt(String(ws?.old_balance ?? 0));
-      const ageDays = ws?.onchain_first_tx_at
-        ? daysBetween(new Date(ws.onchain_first_tx_at))
-        : undefined;
       return {
         wallet,
         balance_ui: rawToUiAmount(raw),
         balance_raw: raw.toString(),
         skipped: true,
         reason: "cooldown",
-        mode,
-        wallet_age_days: ageDays,
         xp: {
           holding_xp: Number(xp?.holding_xp ?? 0),
-          wallet_age_xp: Number(xp?.wallet_age_xp ?? 0),
           task_xp: Number(xp?.task_xp ?? 0),
           referral_xp: Number(xp?.referral_xp ?? 0),
           total_xp: Number(xp?.total_xp ?? 0),
@@ -111,62 +88,41 @@ export async function syncWallet(params: {
     throw new Error("USER_MISMATCH");
   }
 
-  const prev = firstRow<{
-    old_balance: string;
-    last_sync: string;
-    onchain_first_tx_at: string | null;
-  }>(
+  const prev = firstRow<{ old_balance: string; last_sync: string }>(
     await sql`
-      SELECT old_balance, last_sync, onchain_first_tx_at
-      FROM wallet_state WHERE user_id = ${user.id}
+      SELECT old_balance, last_sync FROM wallet_state WHERE user_id = ${user.id}
     `,
   );
   const oldRaw = BigInt(String(prev?.old_balance ?? 0));
 
-  let firstTxAt: Date | null = prev?.onchain_first_tx_at
-    ? new Date(prev.onchain_first_tx_at)
-    : null;
-
-  // Only RPC needed on every sign: token balance.
-  // History scan runs at most once, and only on explicit full sync.
   const [balanceRaw, mintDecimals] = await Promise.all([
     fetchTokenBalanceRaw(wallet),
     fetchMintDecimals(),
   ]);
-  if (!firstTxAt && mode === "full") {
-    firstTxAt = await fetchWalletFirstActivityAt(wallet);
-  }
 
   const balanceUi = rawToUiAmount(balanceRaw, mintDecimals);
-  const firstTxIso = firstTxAt ? firstTxAt.toISOString() : null;
 
   await sql`
-    INSERT INTO wallet_state (user_id, old_balance, last_sync, onchain_first_tx_at)
-    VALUES (${user.id}, ${balanceRaw.toString()}, NOW(), ${firstTxIso})
+    INSERT INTO wallet_state (user_id, old_balance, last_sync)
+    VALUES (${user.id}, ${balanceRaw.toString()}, NOW())
     ON CONFLICT (user_id) DO UPDATE
       SET old_balance = EXCLUDED.old_balance,
-          last_sync = EXCLUDED.last_sync,
-          onchain_first_tx_at = COALESCE(
-            wallet_state.onchain_first_tx_at,
-            EXCLUDED.onchain_first_tx_at
-          )
+          last_sync = EXCLUDED.last_sync
   `;
 
   const xpRow = firstRow<{
     holding_xp: number;
-    wallet_age_xp: number;
     task_xp: number;
     referral_xp: number;
     total_xp: number;
   }>(
     await sql`
-      SELECT holding_xp, wallet_age_xp, task_xp, referral_xp, total_xp
+      SELECT holding_xp, task_xp, referral_xp, total_xp
       FROM xp_state WHERE user_id = ${user.id}
     `,
   );
   const taskXp = Number(xpRow?.task_xp ?? 0);
   let referralXp = Number(xpRow?.referral_xp ?? 0);
-  const existingAgeXp = Number(xpRow?.wallet_age_xp ?? 0);
 
   let referralCompleted = false;
   if (balanceUi > 0) {
@@ -181,35 +137,15 @@ export async function syncWallet(params: {
     }
   }
 
-  let ageDays: number;
-  let walletAgeXp: number;
-
-  if (firstTxAt) {
-    // Cached (or newly discovered) on-chain age → recompute from days
-    ageDays = daysBetween(firstTxAt);
-    walletAgeXp = Math.min(
-      env.WALLET_AGE_XP_CAP,
-      Math.max(0, Math.floor(ageDays) * env.WALLET_AGE_XP_PER_DAY),
-    );
-  } else {
-    // No history scan on balance sync — keep DB age XP as-is
-    walletAgeXp = existingAgeXp;
-    ageDays =
-      env.WALLET_AGE_XP_PER_DAY > 0
-        ? existingAgeXp / env.WALLET_AGE_XP_PER_DAY
-        : 0;
-  }
-
   const holdingXp = Math.max(
     0,
     Math.floor(balanceUi / env.HOLDING_XP_DIVISOR),
   );
   const xp = {
     holding_xp: holdingXp,
-    wallet_age_xp: walletAgeXp,
     task_xp: taskXp,
     referral_xp: referralXp,
-    total_xp: holdingXp + walletAgeXp + taskXp + referralXp,
+    total_xp: holdingXp + taskXp + referralXp,
   };
 
   const prevTotal = Number(xpRow?.total_xp ?? 0);
@@ -221,12 +157,12 @@ export async function syncWallet(params: {
       INSERT INTO xp_state (
         user_id, holding_xp, wallet_age_xp, task_xp, referral_xp, total_xp, updated_at
       ) VALUES (
-        ${user.id}, ${xp.holding_xp}, ${xp.wallet_age_xp},
+        ${user.id}, ${xp.holding_xp}, 0,
         ${xp.task_xp}, ${xp.referral_xp}, ${xp.total_xp}, NOW()
       )
       ON CONFLICT (user_id) DO UPDATE SET
         holding_xp = EXCLUDED.holding_xp,
-        wallet_age_xp = EXCLUDED.wallet_age_xp,
+        wallet_age_xp = 0,
         task_xp = EXCLUDED.task_xp,
         referral_xp = EXCLUDED.referral_xp,
         total_xp = EXCLUDED.total_xp,
@@ -240,8 +176,6 @@ export async function syncWallet(params: {
     balance_ui: balanceUi,
     balance_raw: balanceRaw.toString(),
     skipped: false,
-    mode,
-    wallet_age_days: ageDays,
     xp,
     referral_completed: referralCompleted || undefined,
   };

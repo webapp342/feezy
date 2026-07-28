@@ -180,14 +180,9 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
       setStep("sign", "ok");
       setStep("sync", "active");
       setDetail("Signed. Syncing your bag…");
-      onAuthed();
       notifyNavSession(wallet);
 
-      const syncRes = await fetch("/api/sync-wallet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "balance" }),
-      });
+      const syncRes = await fetch("/api/sync-wallet", { method: "POST" });
       const syncJson = await syncRes.json();
       if (cancelled.current) return;
       if (!syncJson.ok) {
@@ -195,8 +190,9 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
         setDetail("Signed. Sync can retry from Your bag.");
       } else {
         setDetail("Bag synced. XP weight is live.");
-        onAuthed();
       }
+
+      onAuthed();
 
       setStep("sync", "ok");
       setStep("done", "ok");

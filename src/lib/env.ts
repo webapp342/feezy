@@ -11,8 +11,6 @@ const envSchema = z.object({
   TOKEN_MINT: z.string().min(32).max(64),
   TOKEN_DECIMALS: z.coerce.number().int().min(0).max(18).default(6),
   HOLDING_XP_DIVISOR: z.coerce.number().positive().default(1),
-  WALLET_AGE_XP_PER_DAY: z.coerce.number().int().min(0).default(5),
-  WALLET_AGE_XP_CAP: z.coerce.number().int().min(0).default(500),
   REFERRAL_XP_REFERRER: z.coerce.number().int().min(0).default(20000),
   REFERRAL_XP_REFEREE: z.coerce.number().int().min(0).default(20000),
   SYNC_COOLDOWN_SECONDS: z.coerce.number().int().min(0).default(60),
