@@ -28,11 +28,11 @@ Creator fees get eaten. Holders get paid.
 
 🌐 Site: [SİTE_URL]
 📊 Earn: [SİTE_URL]/board
-🟡 Buy: https://pump.fun/coin/FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump
+🟡 Buy: https://pump.fun/coin/3eymXM2qV9sGkWX6V67YWPhgEL2zPa8j7KBVEkzZpump
 🐦 X: https://x.com/ZugChain_org
 
 CA:
-FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump
+3eymXM2qV9sGkWX6V67YWPhgEL2zPa8j7KBVEkzZpump
 
 ⚠️ Admins never DM first. Never share your seed.
 ```
@@ -56,9 +56,9 @@ Holders get paid.
 XP-weighted fee drops
 
 Buy 👇
-https://pump.fun/coin/FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump
+https://pump.fun/coin/3eymXM2qV9sGkWX6V67YWPhgEL2zPa8j7KBVEkzZpump
 
-CA: FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump
+CA: 3eymXM2qV9sGkWX6V67YWPhgEL2zPa8j7KBVEkzZpump
 ```
 
 ---

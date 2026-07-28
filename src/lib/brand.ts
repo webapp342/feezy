@@ -1,6 +1,8 @@
 /** Public brand config — Feezy v2 kit (charcoal fur, product GIFs). */
 
-const MINT = "FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump";
+const DEFAULT_MINT = "3eymXM2qV9sGkWX6V67YWPhgEL2zPa8j7KBVEkzZpump";
+/** Client-visible mint (must match server TOKEN_MINT). */
+const PUBLIC_MINT = process.env.NEXT_PUBLIC_TOKEN_MINT || DEFAULT_MINT;
 /** Bump when kit / opt assets change. */
 const V = "10";
 
@@ -12,12 +14,14 @@ export const BRAND = {
   symbol: process.env.NEXT_PUBLIC_TOKEN_SYMBOL || "FEEZY",
   name: process.env.NEXT_PUBLIC_TOKEN_NAME || "Feezy",
   tagline: "Creator fees get eaten. Holders get paid.",
-  mint: process.env.NEXT_PUBLIC_TOKEN_MINT || MINT,
-  buyUrl: process.env.NEXT_PUBLIC_BUY_URL || `https://pump.fun/coin/${MINT}`,
+  mint: PUBLIC_MINT,
+  buyUrl:
+    process.env.NEXT_PUBLIC_BUY_URL ||
+    `https://pump.fun/coin/${PUBLIC_MINT}`,
   chartUrl:
     process.env.NEXT_PUBLIC_CHART_URL ||
-    `https://dexscreener.com/solana/${MINT}`,
-  solscanUrl: `https://solscan.io/token/${MINT}`,
+    `https://dexscreener.com/solana/${PUBLIC_MINT}`,
+  solscanUrl: `https://solscan.io/token/${PUBLIC_MINT}`,
   creatorWallet:
     process.env.NEXT_PUBLIC_CREATOR_WALLET ||
     "F3Z961xu1uaBgLcyJZnXzmP4aJiyoFAqGPYiDrz7LMy5",
