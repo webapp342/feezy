@@ -24,7 +24,7 @@ export function AppShell() {
       <main className="page">
         <Leaderboard
           refreshKey={refreshKey}
-          limit={5}
+          limit={3}
           variant="teaser"
         />
 

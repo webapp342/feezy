@@ -61,13 +61,6 @@ function inWalletWebView() {
   return inPhantomWebView() || inSolflareWebView();
 }
 
-/** Open site inside Phantom in-app browser (mobile). */
-function openInPhantomBrowse() {
-  const url = encodeURIComponent(window.location.href);
-  const ref = encodeURIComponent(window.location.origin);
-  window.location.href = `https://phantom.app/ul/browse/${url}?ref=${ref}`;
-}
-
 /** Open site inside Solflare in-app browser (mobile). */
 function openInSolflareBrowse() {
   const url = encodeURIComponent(window.location.href);
@@ -86,6 +79,30 @@ function walletTag(ready: WalletReadyState, mobile: boolean) {
     }
   }
   return "";
+}
+
+function walletKind(name: string): "phantom" | "solflare" | null {
+  const n = name.toLowerCase();
+  if (n.includes("phantom")) return "phantom";
+  if (n.includes("solflare")) return "solflare";
+  return null;
+}
+
+/** Mobile: Phantom only when extension detected; Solflare always (Open app or Detected). */
+function mobileWalletVisible(w: {
+  adapter: { name: string };
+  readyState: WalletReadyState;
+}): boolean {
+  const kind = walletKind(String(w.adapter.name));
+  if (!kind) return false;
+  if (kind === "phantom") {
+    return w.readyState === WalletReadyState.Installed;
+  }
+  return (
+    w.readyState === WalletReadyState.Installed ||
+    w.readyState === WalletReadyState.Loadable ||
+    w.readyState === WalletReadyState.NotDetected
+  );
 }
 
 export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
@@ -230,17 +247,16 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
         (name.includes("solflare") && inSolflareWebView()) ||
         (name.includes("phantom") && inPhantomWebView());
 
-      // Mobile outside wallet app: open in-app browser (needs navigation, not connect)
+      // Mobile outside wallet app: Solflare → in-app browser (Phantom only if Detected in list)
       if (
         mobile &&
         !installed &&
         !alreadyInThisWallet &&
         !inWalletWebView() &&
-        (name.includes("phantom") || name.includes("solflare"))
+        name.includes("solflare")
       ) {
-        if (name.includes("phantom")) openInPhantomBrowse();
-        else openInSolflareBrowse();
-        setDetail("Opening wallet app… then tap Connect again inside the app.");
+        openInSolflareBrowse();
+        setDetail("Opening Solflare… then tap Connect again inside the app.");
         return;
       }
 
@@ -271,16 +287,9 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
   const availableWallets = useMemo(() => {
     const ranked = wallets.filter((w) => {
       if (w.readyState === WalletReadyState.Unsupported) return false;
+      if (mobile) return mobileWalletVisible(w);
       if (w.readyState === WalletReadyState.Installed) return true;
-      if (w.readyState === WalletReadyState.Loadable) {
-        if (!mobile) return true;
-        const n = String(w.adapter.name).toLowerCase();
-        return n.includes("phantom") || n.includes("solflare");
-      }
-      if (mobile && w.readyState === WalletReadyState.NotDetected) {
-        const n = String(w.adapter.name).toLowerCase();
-        return n.includes("phantom") || n.includes("solflare");
-      }
+      if (w.readyState === WalletReadyState.Loadable) return true;
       return false;
     });
 
@@ -315,8 +324,8 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
       setDetail(
         mobile
           ? walletWebView
-            ? "Wallet detected — tap Solflare or Phantom to connect."
-            : "Tap Phantom or Solflare — opens in the wallet browser, then connect."
+            ? "Wallet detected — tap your wallet to connect."
+            : "Tap Solflare to open in the app, then connect & sign."
           : "Pick a wallet to continue.",
       );
     }
@@ -378,18 +387,10 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
                 {mobile ? (
                   <>
                     <p className="muted small">
-                      To continue you need a Solana wallet. Open this site
-                      inside Phantom or Solflare, or tap below.
+                      Open this site in Solflare to connect, or install a
+                      Solana wallet on mobile.
                     </p>
                     <div className="auth-wallet-fallback">
-                      <button
-                        type="button"
-                        className="auth-wallet-btn"
-                        onClick={() => openInPhantomBrowse()}
-                      >
-                        <span className="auth-wallet-name">Phantom</span>
-                        <span className="auth-wallet-tag">Open app</span>
-                      </button>
                       <button
                         type="button"
                         className="auth-wallet-btn"
@@ -446,8 +447,8 @@ export function AuthFlowModal({ open, onClose, onAuthed }: Props) {
             {pickError ? <p className="error small">{pickError}</p> : null}
             {mobile ? (
               <p className="muted small auth-wallet-hint">
-                Best on mobile: open the site from Phantom / Solflare Browse,
-                then Connect → Sign.
+                Mobile: Solflare opens in-app browser. Phantom only if already
+                detected on your browser.
               </p>
             ) : null}
           </div>

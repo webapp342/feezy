@@ -16,7 +16,7 @@ export type BoardEntry = {
 
 type Props = {
   refreshKey?: number;
-  /** Cap rows shown (teaser uses 5). */
+  /** Cap rows shown (home teaser uses 3). */
   limit?: number;
   /** Compact teaser layout vs full board. */
   variant?: "full" | "teaser";
@@ -71,7 +71,7 @@ export function Leaderboard({
   }, [load, refreshKey]);
 
   if (variant === "teaser") {
-    const top = entries.slice(0, 5);
+    const top = entries.slice(0, limit ?? 3);
 
     return (
       <section className={`board-teaser ${className}`} id="board-preview">
