@@ -1391,14 +1391,8 @@ a:hover {
   gap: 0.5rem;
 }
 
-.board-ranklist-teaser .board-rankrow {
-  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
-  gap: 0.65rem 0.75rem;
-  padding: 0.7rem 0.8rem;
-}
-
-.board-ranklist-teaser .board-rankrow.is-lead {
-  padding: 0.85rem 0.9rem;
+.board-teaser-mobile {
+  display: none;
 }
 
 .board-teaser-stats {
@@ -1545,6 +1539,14 @@ a:hover {
 @media (max-width: 520px) {
   .board-teaser {
     padding: 1.4rem 0 1.25rem;
+  }
+
+  .board-teaser-desktop {
+    display: none;
+  }
+
+  .board-teaser-mobile {
+    display: grid;
   }
 
   .board-stage-pro {

@@ -100,51 +100,113 @@ export function Leaderboard({
           )}
 
           {top.length > 0 && (
-            <ul className="board-ranklist board-ranklist-teaser">
-              {top.map((e) => {
-                const isLead = e.rank === 1;
-                return (
-                  <li
-                    key={e.wallet}
-                    className={[
-                      "board-rankrow",
-                      isLead ? "is-lead" : "",
-                      highlightWallet === e.wallet ? "is-you" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    <span
-                      className={`board-ranknum rank-tone-${Math.min(e.rank, 4)}`}
+            <>
+              <div className="board-teaser-table board-teaser-desktop">
+                <table className="board-teaser-grid">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Wallet</th>
+                      <th scope="col" className="num">
+                        XP
+                      </th>
+                      <th scope="col" className="num">
+                        Est. payout
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {top.map((e) => {
+                      const isLead = e.rank === 1;
+                      return (
+                        <tr
+                          key={e.wallet}
+                          className={[
+                            isLead ? "is-lead" : "",
+                            highlightWallet === e.wallet ? "is-you" : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                        >
+                          <td>
+                            <span
+                              className={`board-ranknum rank-tone-${Math.min(e.rank, 4)}`}
+                            >
+                              {e.rank}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="board-rankline board-rankline-pro">
+                              <code className="mono board-rankwallet">
+                                {shortWallet(e.wallet)}
+                              </code>
+                              {isLead ? (
+                                <span className="board-lead-tag">Lead</span>
+                              ) : null}
+                              {highlightWallet === e.wallet ? (
+                                <span className="board-you-tag">You</span>
+                              ) : null}
+                            </div>
+                          </td>
+                          <td className="num board-rankxp-pro">
+                            <strong>{e.xp.toLocaleString()}</strong>
+                          </td>
+                          <td className="num board-rankpayout">
+                            {poolSol > 0 ? teaserPayout(e) : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <ul className="board-ranklist board-ranklist-teaser board-teaser-mobile">
+                {top.map((e) => {
+                  const isLead = e.rank === 1;
+                  return (
+                    <li
+                      key={e.wallet}
+                      className={[
+                        "board-rankrow",
+                        isLead ? "is-lead" : "",
+                        highlightWallet === e.wallet ? "is-you" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                     >
-                      {e.rank}
-                    </span>
-                    <div className="board-rankmeta">
-                      <div className="board-rankline board-rankline-pro">
-                        <code className="mono board-rankwallet">
-                          {shortWallet(e.wallet)}
-                        </code>
-                        {isLead ? (
-                          <span className="board-lead-tag">Lead</span>
-                        ) : null}
-                        {highlightWallet === e.wallet ? (
-                          <span className="board-you-tag">You</span>
+                      <span
+                        className={`board-ranknum rank-tone-${Math.min(e.rank, 4)}`}
+                      >
+                        {e.rank}
+                      </span>
+                      <div className="board-rankmeta">
+                        <div className="board-rankline board-rankline-pro">
+                          <code className="mono board-rankwallet">
+                            {shortWallet(e.wallet)}
+                          </code>
+                          {isLead ? (
+                            <span className="board-lead-tag">Lead</span>
+                          ) : null}
+                          {highlightWallet === e.wallet ? (
+                            <span className="board-you-tag">You</span>
+                          ) : null}
+                        </div>
+                      </div>
+                      <div className="board-rankxp board-teaser-stats">
+                        <strong>{e.xp.toLocaleString()}</strong>
+                        <span>XP</span>
+                        {poolSol > 0 ? (
+                          <span className="board-teaser-payout">
+                            {teaserPayout(e)}
+                          </span>
                         ) : null}
                       </div>
-                    </div>
-                    <div className="board-rankxp board-teaser-stats">
-                      <strong>{e.xp.toLocaleString()}</strong>
-                      <span>XP</span>
-                      {poolSol > 0 ? (
-                        <span className="board-teaser-payout">
-                          {teaserPayout(e)}
-                        </span>
-                      ) : null}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
           )}
 
           {poolSol > 0 && top.length > 0 && (
