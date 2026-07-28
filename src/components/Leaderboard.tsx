@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { formatEstSol } from "@/lib/snapshot-estimate";
+import { LazyImg } from "./LazyImg";
 
 export type BoardEntry = {
   rank: number;
@@ -173,12 +174,10 @@ export function Leaderboard({
   return (
     <div className={`panel panel-with-sticker board-panel ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <LazyImg
         src={BRAND.images.stickers.laugh}
         alt=""
         className="panel-sticker panel-sticker-lg"
-        loading="lazy"
-        decoding="async"
       />
       <div className="row between">
         <h2>XP Board</h2>

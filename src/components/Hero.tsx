@@ -10,6 +10,7 @@ import {
   IconPump,
   StampBadge,
 } from "./Icons";
+import { LazyImg } from "./LazyImg";
 
 export function Hero() {
   const [copied, setCopied] = useState(false);
@@ -97,14 +98,10 @@ export function Hero() {
             decoding="async"
           />
           <div className="hero-floaters" aria-hidden>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.laugh} alt="" className="floater floater-a" loading="lazy" decoding="async" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={BRAND.images.coin} alt="" className="floater floater-b" loading="lazy" decoding="async" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.point} alt="" className="floater floater-c" loading="lazy" decoding="async" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.logo} alt="" className="floater floater-d" loading="lazy" decoding="async" />
+            <LazyImg src={s.laugh} alt="" className="floater floater-a" />
+            <LazyImg src={BRAND.images.coin} alt="" className="floater floater-b" />
+            <LazyImg src={s.point} alt="" className="floater floater-c" />
+            <LazyImg src={s.logo} alt="" className="floater floater-d" />
           </div>
         </div>
       </div>

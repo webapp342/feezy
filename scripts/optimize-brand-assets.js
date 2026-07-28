@@ -28,6 +28,12 @@ const jobs = [
     q: 82,
   },
   {
+    in: "public/brand/kit/feezy-canonical-logo.png",
+    out: "logo-480.webp",
+    w: 480,
+    q: 84,
+  },
+  {
     in: "public/brand/kit/feezy-coin.png",
     out: "coin-160.webp",
     w: 160,

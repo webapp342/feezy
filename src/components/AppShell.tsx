@@ -10,6 +10,7 @@ import {
 import { Leaderboard } from "./Leaderboard";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+import { LazyImg } from "./LazyImg";
 
 export function AppShell() {
   const { refreshKey, onAuthed, onLoggedOut } = useAuthGate();
@@ -34,12 +35,10 @@ export function AppShell() {
         <section className="earn-cta" id="earn">
           <div className="earn-cta-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <LazyImg
               src={BRAND.images.gifs.feeDrop}
               alt=""
               className="earn-cta-gif"
-              loading="lazy"
-              decoding="async"
             />
             <div>
               <h2 className="section-title">Ready to stack weight?</h2>

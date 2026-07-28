@@ -2,7 +2,7 @@
 
 const MINT = "FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump";
 /** Bump when kit / opt assets change. */
-const V = "9";
+const V = "10";
 
 function asset(path: string) {
   return `${path}?v=${V}`;
@@ -47,7 +47,7 @@ export const BRAND = {
       shush: asset("/brand/kit/feezy-sticker-shush.png"),
       timer: asset("/brand/kit/feezy-sticker-timer.png"),
       xp: asset("/brand/kit/feezy-sticker-xp.png"),
-      logo: asset("/brand/opt/logo-96.webp"),
+      logo: asset("/brand/opt/logo-480.webp"),
     },
     bg: asset("/brand/opt/bg-hero.webp"),
     markSvg: "/brand/kit/icons/feezy-mark.svg",

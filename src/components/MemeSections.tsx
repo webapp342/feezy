@@ -1,5 +1,6 @@
 import { BRAND } from "@/lib/brand";
 import { IconPump } from "./Icons";
+import { LazyImg } from "./LazyImg";
 
 const steps = [
   {
@@ -58,34 +59,26 @@ export function LoreStrip() {
     <section className="lore lore-meme" id="how">
       <div className="lore-visual lore-visual-free">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <LazyImg
           src={BRAND.images.gifs.eat}
           alt={`${BRAND.name} eating creator fees`}
           className="lore-mascot lore-mascot-xl"
           width={720}
           height={720}
-          loading="lazy"
-          decoding="async"
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <LazyImg
           src={BRAND.images.coin}
           alt=""
           className="lore-coin"
           width={160}
           height={160}
-          loading="lazy"
-          decoding="async"
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <LazyImg
           src={BRAND.images.stickers.laugh}
           alt=""
           className="lore-floater"
           width={180}
           height={180}
-          loading="lazy"
-          decoding="async"
         />
       </div>
       <div className="lore-text">
@@ -118,7 +111,7 @@ export function HowToBuy() {
             style={{ ["--tilt" as string]: `${s.tilt}deg` }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.img} alt="" className="howto-sticker-xl" loading="lazy" decoding="async" />
+            <LazyImg src={s.img} alt="" className="howto-sticker-xl" />
             <div className="howto-chip-body">
               <span className="howto-n">{s.n}</span>
               <strong>{s.title}</strong>
@@ -147,7 +140,7 @@ export function TokenomicsLite() {
         {loop.map((item, i) => (
           <div key={item.label} className="tok-step">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.img} alt="" className="tok-sticker-xl" loading="lazy" decoding="async" />
+            <LazyImg src={item.img} alt="" className="tok-sticker-xl" />
             <span className="muted small">{item.label}</span>
             <p className="tok-val">{item.value}</p>
             <p className="muted small">{item.note}</p>
