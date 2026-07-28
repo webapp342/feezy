@@ -1,8 +1,9 @@
 # $FEEZY Social Pack (AI)
 
-## Avatars (frame-safe)
+## X profile
 | File | Size | Use |
 |------|------|-----|
+| `x-banner-1500x500.png` | 1500×500 | X header banner |
 | `x-avatar-400.png` | 400×400 | X profile (circular safe) |
 | `tg-avatar-512.png` | 512×512 | Telegram photo |
 

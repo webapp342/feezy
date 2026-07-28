@@ -47,3 +47,23 @@ next-env.d.ts
 
 # temp previews
 public/brand/kit/_*.png
+
+# ── Brand: social pack (X/TG — local only, not served by site) ──
+public/brand/social/masters/
+public/brand/social/*.png
+
+# ── Brand: heavy source art (site uses opt/*.webp + kit gifs/stickers) ──
+public/brand/feezy-bg-hero.png
+public/brand/feezy-hero.png
+public/brand/feezy-logo.png
+public/brand/feezy-bounce.gif
+public/brand/feezy-fee-drop.gif
+
+# Kit PNG masters — runtime stickers kept via ! rules below
+public/brand/kit/*.png
+!public/brand/kit/feezy-sticker-shush.png
+!public/brand/kit/feezy-sticker-timer.png
+!public/brand/kit/feezy-sticker-xp.png
+
+# Cursor / local AI exports (regenerate with scripts when needed)
+assets/
