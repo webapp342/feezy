@@ -23,7 +23,7 @@ export async function GET() {
     } catch {
       onChainSol = 0;
     }
-    const poolSol = effectiveSnapshotPool(onChainSol);
+    const { poolSol } = await effectiveSnapshotPool(onChainSol);
 
     const topTier = entries.slice(0, SNAPSHOT_RULES.top_xp_weighted);
     const enriched = entries.map((e: LeaderboardEntry) => {

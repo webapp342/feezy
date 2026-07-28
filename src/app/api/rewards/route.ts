@@ -1,13 +1,13 @@
 import { getEnv } from "@/lib/env";
 import { jsonError, jsonOk } from "@/lib/http";
-import { getSnapshotPoolBonusSol, SNAPSHOT_RULES, effectiveSnapshotPool } from "@/lib/snapshot-rules";
+import { SNAPSHOT_RULES, effectiveSnapshotPool } from "@/lib/snapshot-rules";
 import { fetchCreatorUnclaimedFeesSol } from "@/lib/solana";
 
 export const runtime = "nodejs";
 
 /**
  * Current rewards = pump.fun unclaimed creator earnings for CREATOR_WALLET
- * (creator vault / fee-sharing), not the wallet's native SOL balance.
+ * + admin-configured pool bonus from DB.
  */
 export async function GET() {
   try {
@@ -20,14 +20,14 @@ export async function GET() {
       error = e instanceof Error ? e.message : "RPC failed";
       console.error("[rewards]", e);
     }
-    const sol = effectiveSnapshotPool(onChainSol);
+    const { poolSol, bonusSol } = await effectiveSnapshotPool(onChainSol);
 
     return jsonOk(
       {
         creator_wallet: CREATOR_WALLET,
-        current_rewards_sol: sol,
+        current_rewards_sol: poolSol,
         on_chain_rewards_sol: onChainSol,
-        pool_bonus_sol: getSnapshotPoolBonusSol(),
+        pool_bonus_sol: bonusSol,
         current_rewards_error: error,
         distributed: [] as {
           id: string;

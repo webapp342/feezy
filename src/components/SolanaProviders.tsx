@@ -23,9 +23,11 @@ export function SolanaProviders({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  // autoConnect on mobile can fire connect without a user gesture and then
+  // fall through to install / App Store redirects. Connect only on tap.
   return (
     <ConnectionProvider endpoint={rpc}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets} autoConnect={false}>
         {children}
       </WalletProvider>
     </ConnectionProvider>

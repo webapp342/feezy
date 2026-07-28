@@ -4,9 +4,13 @@ import { PublicKey } from "@solana/web3.js";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { getEnv } from "./env";
+import { BRAND } from "./brand";
 
 export const SESSION_COOKIE = "cfs_session";
-const AUTH_MESSAGE_PREFIX = "Sign in to Creator Fee XP\nNonce: ";
+
+function authMessagePrefix() {
+  return `Sign in to $${BRAND.symbol}\nNonce: `;
+}
 
 function secretKey() {
   return new TextEncoder().encode(getEnv().SESSION_SECRET);
@@ -18,7 +22,7 @@ export type SessionPayload = {
 };
 
 export function buildAuthMessage(nonce: string): string {
-  return `${AUTH_MESSAGE_PREFIX}${nonce}`;
+  return `${authMessagePrefix()}${nonce}`;
 }
 
 export function verifyWalletSignature(params: {

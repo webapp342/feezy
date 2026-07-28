@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { BRAND } from "@/lib/brand";
 
 type RewardsData = {
   current_rewards_sol: number;
@@ -41,13 +40,7 @@ export function RewardsPanel({ refreshKey = 0 }: { refreshKey?: number }) {
   return (
     <section className="board-card rewards-panel">
       <header className="board-card-head">
-        <div>
-          <h2 className="board-card-title">Rewards</h2>
-          <p className="board-card-desc">
-            Unclaimed ${BRAND.symbol} creator fees on pump.fun — split at
-            snapshot.
-          </p>
-        </div>
+        <h2 className="board-card-title">Ready for next snapshot</h2>
         <button
           type="button"
           className="btn btn-ghost btn-sm"
@@ -63,7 +56,6 @@ export function RewardsPanel({ refreshKey = 0 }: { refreshKey?: number }) {
 
       {!loading && data && (
         <div className="rewards-pool">
-          <p className="board-stat-label">Ready for next snapshot</p>
           <p className="board-stat-value">
             {data.current_rewards_sol.toLocaleString(undefined, {
               maximumFractionDigits: 6,

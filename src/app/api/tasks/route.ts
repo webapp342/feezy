@@ -17,12 +17,13 @@ export async function GET() {
       title: string;
       reward_xp: number;
       active: boolean;
+      link_url: string | null;
     }>(
       await sql`
-        SELECT id, type, title, reward_xp, active
+        SELECT id, type, title, reward_xp, active, link_url
         FROM tasks
-        WHERE active = TRUE
-        ORDER BY reward_xp DESC, type ASC
+        WHERE active = TRUE AND deleted_at IS NULL
+        ORDER BY sort_order ASC, reward_xp DESC, created_at ASC
       `,
     );
 
@@ -36,14 +37,24 @@ export async function GET() {
       completed = new Set(done.map((r) => String(r.task_id)));
     }
 
-    return jsonOk({
-      tasks: tasks.map((t) => ({
+    const open = tasks
+      .map((t) => ({
         id: String(t.id),
         type: String(t.type),
         title: String(t.title),
         reward_xp: Number(t.reward_xp),
+        link_url: t.link_url ? String(t.link_url) : null,
         completed: completed.has(String(t.id)),
-      })),
+      }))
+      .filter((t) => !t.completed);
+
+    return jsonOk({
+      tasks: open,
+      empty: open.length === 0,
+      message:
+        open.length === 0
+          ? "No new raids right now. Check back when the next drop drops."
+          : null,
     });
   } catch (err) {
     console.error("[tasks]", err);
@@ -73,12 +84,14 @@ export async function POST(req: Request) {
       type: string;
       reward_xp: number;
       active: boolean;
+      deleted_at: string | null;
     }>(
       await sql`
-        SELECT id, type, reward_xp, active FROM tasks WHERE id = ${body.data.taskId}
+        SELECT id, type, reward_xp, active, deleted_at
+        FROM tasks WHERE id = ${body.data.taskId}
       `,
     );
-    if (!task || !task.active) {
+    if (!task || !task.active || task.deleted_at) {
       return jsonError("Task not found", 404);
     }
 
@@ -93,7 +106,6 @@ export async function POST(req: Request) {
       return jsonError("Task already completed", 409);
     }
 
-    // TODO: per-type verification adapters (twitter_share, telegram_join, …)
     await sql`
       INSERT INTO user_tasks (user_id, task_id) VALUES (${session.sub}, ${body.data.taskId})
     `;

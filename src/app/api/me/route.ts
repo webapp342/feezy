@@ -87,7 +87,7 @@ export async function GET() {
     } catch {
       onChainSol = 0;
     }
-    const poolSol = effectiveSnapshotPool(onChainSol);
+    const { poolSol } = await effectiveSnapshotPool(onChainSol);
 
     const topEntries = await getLeaderboard(SNAPSHOT_RULES.top_xp_weighted);
     const estimate = estimateSnapshotEarnings(

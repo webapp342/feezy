@@ -1,0 +1,39 @@
+# Paste into Vercel → Project → Settings → Environment Variables
+# (Production + Preview + Development)
+#
+# 1) Change NEXT_PUBLIC_APP_URL to your live https:// domain
+# 2) Use the SAME SESSION_SECRET as .env.local (already generated locally)
+# 3) Do NOT add REFERRAL_THRESHOLD_BALANCE (removed)
+# 4) Do NOT add SNAPSHOT_POOL_BONUS_SOL (bonus is in DB via /admin)
+
+NEXT_PUBLIC_APP_URL=https://YOUR-DOMAIN.com
+SESSION_SECRET=<copy from .env.local SESSION_SECRET>
+
+DATABASE_URL=<copy from .env.local DATABASE_URL>
+
+UPSTASH_REDIS_REST_URL=<copy from .env.local>
+UPSTASH_REDIS_REST_TOKEN=<copy from .env.local>
+
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+TOKEN_MINT=FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump
+TOKEN_DECIMALS=6
+CREATOR_WALLET=F3Z961xu1uaBgLcyJZnXzmP4aJiyoFAqGPYiDrz7LMy5
+NEXT_PUBLIC_CREATOR_WALLET=F3Z961xu1uaBgLcyJZnXzmP4aJiyoFAqGPYiDrz7LMy5
+
+NEXT_PUBLIC_TOKEN_SYMBOL=FEEZY
+NEXT_PUBLIC_TOKEN_NAME=Feezy
+NEXT_PUBLIC_BUY_URL=https://pump.fun/coin/FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump
+NEXT_PUBLIC_CHART_URL=https://dexscreener.com/solana/FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump
+NEXT_PUBLIC_X_URL=https://x.com/ZugChain_org
+NEXT_PUBLIC_X_RAID_TWEET_ID=2082167574825996588
+NEXT_PUBLIC_TELEGRAM_URL=https://t.me/feezyfun
+NEXT_PUBLIC_REFERRAL_XP_EACH=20000
+
+HOLDING_XP_DIVISOR=1
+WALLET_AGE_XP_PER_DAY=5
+WALLET_AGE_XP_CAP=500
+REFERRAL_XP_REFERRER=20000
+REFERRAL_XP_REFEREE=20000
+SYNC_COOLDOWN_SECONDS=60
+LEADERBOARD_LIMIT=100

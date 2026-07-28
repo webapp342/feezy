@@ -1819,9 +1819,80 @@ a:hover {
   overflow: visible;
 }
 
+.board-dash-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  padding: 0.3rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-deep) 55%, transparent);
+}
+
+.board-dash-tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.board-dash-tab.is-active {
+  background: color-mix(in srgb, var(--yellow) 88%, #fff);
+  color: var(--yellow-ink);
+}
+
+.board-dash-panel {
+  display: none;
+}
+
+.board-dash-panel.is-active {
+  display: block;
+}
+
+@media (max-width: 959px) {
+  .board-dash {
+    order: 1;
+  }
+
+  .board-main {
+    order: 2;
+  }
+}
+
 @media (min-width: 960px) {
   .board-layout {
     grid-template-columns: 1.35fr 0.9fr;
+  }
+
+  .board-main {
+    order: 1;
+  }
+
+  .board-dash {
+    order: 2;
+  }
+
+  .board-dash-tabs {
+    display: none;
+  }
+
+  .board-dash-panel {
+    display: block;
+  }
+}
+
+/* Mobile XP Board: hide XP column, keep Est. payout */
+@media (max-width: 720px) {
+  .board-table th:nth-child(3),
+  .board-table td:nth-child(3) {
+    display: none;
   }
 }
 
@@ -2385,4 +2456,60 @@ a:hover {
   flex-wrap: wrap;
   gap: 0.55rem;
   margin-top: 1rem;
+}
+
+.board-empty-raids {
+  margin: 0.75rem 0 0;
+  line-height: 1.45;
+}
+
+.admin-page .board-card {
+  margin-bottom: 1rem;
+}
+
+.admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.admin-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.admin-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.admin-input {
+  width: 100%;
+  max-width: 28rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-deep) 60%, transparent);
+  color: var(--ink);
+  font: inherit;
+}
+
+.admin-raid-row {
+  align-items: flex-start;
+}
+
+.admin-raid-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.admin-danger {
+  border-color: color-mix(in srgb, #ff5a5a 45%, var(--line));
 }

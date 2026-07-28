@@ -9,9 +9,12 @@ import { TasksPanel } from "./TasksPanel";
 import { UserStats } from "./UserStats";
 import { RewardsPanel } from "./RewardsPanel";
 
+type DashTab = "bag" | "raids";
+
 export function BoardShell() {
   const { refreshKey, authed, bump, onAuthed, onLoggedOut } = useAuthGate();
   const [meWallet, setMeWallet] = useState<string | null>(null);
+  const [dashTab, setDashTab] = useState<DashTab>("bag");
 
   useEffect(() => {
     if (!authed) {
@@ -42,7 +45,11 @@ export function BoardShell() {
               Hold ${BRAND.symbol}, stack XP, catch creator-fee snapshots.
             </p>
             <div className="board-hero-actions">
-              <a className="btn btn-pill btn-buy" href="#your-bag">
+              <a
+                className="btn btn-pill btn-buy"
+                href="#your-bag"
+                onClick={() => setDashTab("bag")}
+              >
                 Your bag
               </a>
               <Link className="btn btn-pill btn-ghost-light" href="/">
@@ -56,6 +63,58 @@ export function BoardShell() {
         </header>
 
         <section className="board-layout">
+          <aside className="board-dash">
+            <div className="board-dash-tabs" role="tablist" aria-label="Board panels">
+              <button
+                type="button"
+                role="tab"
+                id="tab-bag"
+                aria-selected={dashTab === "bag"}
+                aria-controls="panel-bag"
+                className={`board-dash-tab ${dashTab === "bag" ? "is-active" : ""}`}
+                onClick={() => setDashTab("bag")}
+              >
+                Your bag
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="tab-raids"
+                aria-selected={dashTab === "raids"}
+                aria-controls="panel-raids"
+                className={`board-dash-tab ${dashTab === "raids" ? "is-active" : ""}`}
+                onClick={() => setDashTab("raids")}
+              >
+                Raids
+              </button>
+            </div>
+
+            <div
+              id="panel-bag"
+              role="tabpanel"
+              aria-labelledby="tab-bag"
+              className={`board-dash-panel ${dashTab === "bag" ? "is-active" : ""}`}
+            >
+              <UserStats
+                refreshKey={refreshKey}
+                authed={authed}
+                onAuthed={onAuthed}
+              />
+            </div>
+            <div
+              id="panel-raids"
+              role="tabpanel"
+              aria-labelledby="tab-raids"
+              className={`board-dash-panel ${dashTab === "raids" ? "is-active" : ""}`}
+            >
+              <TasksPanel
+                refreshKey={refreshKey}
+                authed={authed}
+                onChanged={bump}
+              />
+            </div>
+          </aside>
+
           <div className="board-main">
             <Leaderboard
               refreshKey={refreshKey}
@@ -63,18 +122,6 @@ export function BoardShell() {
               highlightWallet={meWallet}
             />
           </div>
-          <aside className="board-dash">
-            <UserStats
-              refreshKey={refreshKey}
-              authed={authed}
-              onAuthed={onAuthed}
-            />
-            <TasksPanel
-              refreshKey={refreshKey}
-              authed={authed}
-              onChanged={bump}
-            />
-          </aside>
         </section>
       </main>
     </SiteChrome>

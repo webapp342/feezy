@@ -28,10 +28,33 @@ export const metadata: Metadata = {
   ),
   title: `$${BRAND.symbol} — ${BRAND.name}`,
   description: BRAND.tagline,
+  applicationName: BRAND.name,
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/favicon.png", type: "image/png", sizes: "48x48" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     title: `$${BRAND.symbol} — ${BRAND.name}`,
     description: BRAND.tagline,
-    images: [BRAND.images.mascot],
+    siteName: BRAND.name,
+    images: [
+      {
+        url: BRAND.images.stickers.logo,
+        width: 480,
+        height: 480,
+        alt: BRAND.name,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: `$${BRAND.symbol} — ${BRAND.name}`,
+    description: BRAND.tagline,
+    images: [BRAND.images.stickers.logo],
   },
 };
 
