@@ -21,12 +21,15 @@ export const BRAND = {
   creatorWallet:
     process.env.NEXT_PUBLIC_CREATOR_WALLET ||
     "F3Z961xu1uaBgLcyJZnXzmP4aJiyoFAqGPYiDrz7LMy5",
-  xUrl: process.env.NEXT_PUBLIC_X_URL || "https://x.com/ZugChain_org",
-  /** Tweet id for RT + Tag raid (intent/retweet). */
-  xRaidTweetId:
-    process.env.NEXT_PUBLIC_X_RAID_TWEET_ID || "2082167574825996588",
-  telegramUrl:
-    process.env.NEXT_PUBLIC_TELEGRAM_URL || "https://t.me/feezyfun",
+  /** Footer + desktop nav socials (not raid links — those live in DB /admin). */
+  footerXUrl:
+    process.env.NEXT_PUBLIC_FOOTER_X_URL ||
+    process.env.NEXT_PUBLIC_X_URL ||
+    "https://x.com/ZugChain_org",
+  footerTelegramUrl:
+    process.env.NEXT_PUBLIC_FOOTER_TELEGRAM_URL ||
+    process.env.NEXT_PUBLIC_TELEGRAM_URL ||
+    "https://t.me/feezyfun",
   referral: {
     xpEach: Number(process.env.NEXT_PUBLIC_REFERRAL_XP_EACH || 20000),
   },

@@ -5,6 +5,8 @@
 # 2) Use the SAME SESSION_SECRET as .env.local (already generated locally)
 # 3) Do NOT add REFERRAL_THRESHOLD_BALANCE (removed)
 # 4) Do NOT add SNAPSHOT_POOL_BONUS_SOL (bonus is in DB via /admin)
+# 5) Raid URLs (X follow, RT, TG) → /admin only, NOT env
+# 6) Footer/nav socials → NEXT_PUBLIC_FOOTER_X_URL + NEXT_PUBLIC_FOOTER_TELEGRAM_URL
 
 NEXT_PUBLIC_APP_URL=https://YOUR-DOMAIN.com
 SESSION_SECRET=<copy from .env.local SESSION_SECRET>
@@ -25,9 +27,8 @@ NEXT_PUBLIC_TOKEN_SYMBOL=FEEZY
 NEXT_PUBLIC_TOKEN_NAME=Feezy
 NEXT_PUBLIC_BUY_URL=https://pump.fun/coin/FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump
 NEXT_PUBLIC_CHART_URL=https://dexscreener.com/solana/FeXWkSxjWKcj7qzSWjHnvryYrs6AxVztyrmc6gQTpump
-NEXT_PUBLIC_X_URL=https://x.com/ZugChain_org
-NEXT_PUBLIC_X_RAID_TWEET_ID=2082167574825996588
-NEXT_PUBLIC_TELEGRAM_URL=https://t.me/feezyfun
+NEXT_PUBLIC_FOOTER_X_URL=https://x.com/ZugChain_org
+NEXT_PUBLIC_FOOTER_TELEGRAM_URL=https://t.me/feezyfun
 NEXT_PUBLIC_REFERRAL_XP_EACH=20000
 
 HOLDING_XP_DIVISOR=1

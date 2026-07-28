@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { BRAND } from "@/lib/brand";
 
 type Task = {
   id: string;
@@ -19,13 +18,14 @@ type Props = {
 };
 
 function fallbackHref(type: string): string | null {
+  /** Only used when admin left link_url empty — raids should set URL in /admin. */
   switch (type) {
     case "telegram_join":
-      return BRAND.telegramUrl || "https://t.me/feezyfun";
+      return "https://t.me/feezyfun";
     case "twitter_follow":
-      return BRAND.xUrl || "https://x.com/ZugChain_org";
+      return "https://x.com/intent/follow?screen_name=ZugChain_org";
     case "twitter_share":
-      return `https://twitter.com/intent/retweet?tweet_id=${BRAND.xRaidTweetId}`;
+      return "https://twitter.com/intent/retweet?tweet_id=2082167574825996588";
     default:
       return null;
   }

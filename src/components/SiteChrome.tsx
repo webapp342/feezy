@@ -7,6 +7,30 @@ import { BRAND } from "@/lib/brand";
 import { ConnectAuth } from "./ConnectAuth";
 import { IconPump, IconTelegram, IconX } from "./Icons";
 
+function SocialLinks({ className = "" }: { className?: string }) {
+  const { footerXUrl, footerTelegramUrl } = BRAND;
+  if (!footerXUrl && !footerTelegramUrl) return null;
+  return (
+    <div className={className}>
+      {footerXUrl ? (
+        <a href={footerXUrl} target="_blank" rel="noreferrer" aria-label="X">
+          <IconX />
+        </a>
+      ) : null}
+      {footerTelegramUrl ? (
+        <a
+          href={footerTelegramUrl}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Telegram"
+        >
+          <IconTelegram />
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
 type Props = {
   active?: "home" | "board";
   children: React.ReactNode;
@@ -59,6 +83,7 @@ export function SiteChrome({
           </div>
 
           <div className="nav-actions">
+            <SocialLinks className="nav-social-desktop" />
             <a
               className="btn btn-pill btn-buy btn-nav btn-nav-buy"
               href={BRAND.buyUrl}
@@ -92,21 +117,7 @@ export function SiteChrome({
         </div>
         <div className="footer-social">
           <Link href="/board">XP Board</Link>
-          {BRAND.xUrl ? (
-            <a href={BRAND.xUrl} target="_blank" rel="noreferrer" aria-label="X">
-              <IconX />
-            </a>
-          ) : null}
-          {BRAND.telegramUrl ? (
-            <a
-              href={BRAND.telegramUrl}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Telegram"
-            >
-              <IconTelegram />
-            </a>
-          ) : null}
+          <SocialLinks className="footer-social-icons" />
           <a href={BRAND.buyUrl} target="_blank" rel="noreferrer">
             pump.fun
           </a>

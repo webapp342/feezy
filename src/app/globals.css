@@ -233,6 +233,38 @@ a:hover {
   justify-content: center;
 }
 
+.nav-social-desktop {
+  display: none;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.nav-social-desktop a,
+.footer-social-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 2px solid color-mix(in srgb, var(--line) 70%, transparent);
+  color: rgba(255, 255, 255, 0.88);
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.nav-social-desktop a:hover,
+.footer-social-icons a:hover {
+  color: var(--yellow);
+  border-color: color-mix(in srgb, var(--yellow) 45%, var(--line));
+  background: color-mix(in srgb, var(--yellow) 8%, transparent);
+}
+
+.footer-social-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .nav-wallet {
   display: flex;
   align-items: center;
@@ -245,6 +277,10 @@ a:hover {
 
 @media (min-width: 900px) {
   .nav-links {
+    display: flex;
+  }
+
+  .nav-social-desktop {
     display: flex;
   }
 
