@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { BRAND, shortMint } from "@/lib/brand";
 import {
-  IconChart,
   IconCopy,
   IconExternal,
   IconPump,
@@ -52,16 +51,8 @@ export function Hero() {
             >
               <IconPump /> Buy ${BRAND.symbol}
             </a>
-            <a
-              className="btn btn-pill btn-ghost-light"
-              href={BRAND.chartUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <IconChart /> Chart
-            </a>
             <a className="btn btn-pill btn-ghost-light" href="/board">
-              XP Board
+              Earn
             </a>
           </div>
           <div className="mint-row">

@@ -47,7 +47,7 @@ export function AppShell() {
                 before the next random fee drop.
               </p>
               <Link className="btn btn-pill btn-buy" href="/board">
-                Go to XP Board
+                Earn
               </Link>
             </div>
           </div>
